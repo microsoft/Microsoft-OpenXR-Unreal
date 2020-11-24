@@ -1,3 +1,6 @@
+// Copyright (c) 2020 Microsoft Corporation.
+// Licensed under the MIT License.
+
 #include "QRTrackingPlugin.h"
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 #include "OpenXRCore.h"

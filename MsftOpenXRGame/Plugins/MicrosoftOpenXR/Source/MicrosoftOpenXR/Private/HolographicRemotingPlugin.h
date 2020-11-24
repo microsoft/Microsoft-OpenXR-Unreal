@@ -1,3 +1,6 @@
+// Copyright (c) 2020 Microsoft Corporation.
+// Licensed under the MIT License.
+
 #pragma once
 
 // Currently remoting only supports x64 Windows: Editor and Packaged Exe

@@ -1,6 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-
-// Simple type conversion functions for working with the WindowsMixedRealityInterop
+// Copyright (c) 2020 Microsoft Corporation.
+// Licensed under the MIT License.
 
 #pragma once
 

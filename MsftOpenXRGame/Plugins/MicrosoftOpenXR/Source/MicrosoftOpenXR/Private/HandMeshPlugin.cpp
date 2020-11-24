@@ -1,3 +1,6 @@
+// Copyright (c) 2020 Microsoft Corporation.
+// Licensed under the MIT License.
+
 #include "HandMeshPlugin.h"
 #include "InputCoreTypes.h"
 #include "OpenXRCore.h"

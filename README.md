@@ -37,7 +37,7 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 ## Installing the plugin from source
 
-1. Copy the contents of MRExtGame/Plugins to [YourUnrealProjectRoot]/Plugins. The *Plugins* folder should be
+1. Copy the contents of MsftOpenXRGame/Plugins to [YourUnrealProjectRoot]/Plugins. The *Plugins* folder should be
    located at the root of your project, where the .uproject file is. Create it if it doesn't exist.
 1. If you are building the editor from Visual Studio, regenerate the Visual Studio solution file.
 
