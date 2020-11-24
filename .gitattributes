@@ -1,0 +1,12 @@
+# Batch scripts need CR/LF line endings
+*.bat eol=crlf
+
+# Shell scripts need unix line endings
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.umap binary
+*.uasset binary
+*.dll binary
