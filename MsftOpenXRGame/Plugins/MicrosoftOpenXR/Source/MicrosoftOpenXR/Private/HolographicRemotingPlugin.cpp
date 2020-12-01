@@ -182,6 +182,7 @@ namespace MicrosoftOpenXR
 		}
 		remoteContext.maxBitrateKbps = data.Bitrate;
 		remoteContext.videoCodec = (XrRemotingVideoCodecMSFT)data.ConnectionCodec;
+		remoteContext.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
 		if (XR_FAILED(setContextProperties(Instance, System, &remoteContext)))
 		{
 			SetRemotingStatusText("xrRemotingSetContextPropertiesMSFT failed, check remoting inputs.", FLinearColor::Red);
