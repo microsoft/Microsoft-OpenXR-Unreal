@@ -187,15 +187,24 @@ public class MicrosoftOpenXR : ModuleRules
 						RuntimeDependencies.Add(newDll);
 					}
 				}
-			}
-		}
 
-		if (Target.Platform == UnrealTargetPlatform.Win64)
-		{
-			PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "ThirdParty", "HolographicAppRemoting"));
-			
-			RuntimeDependencies.Add("$(PluginDir)/ThirdParty/HolographicAppRemoting/Windows/Win64/Microsoft.Holographic.AppRemoting.OpenXr.dll");
-			RuntimeDependencies.Add("$(PluginDir)/ThirdParty/HolographicAppRemoting/Windows/Win64/RemotingXR.json");
+				string RemotingPackage = InstalledPackages.First(x => x.StartsWith("Microsoft.Holographic.Remoting.OpenXr"));
+				if (!string.IsNullOrEmpty(RemotingPackage))
+				{
+					string RemotingFolderName = RemotingPackage.Replace(" ", ".");
+
+					SafeCopy(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\bin\x64\Desktop\Microsoft.Holographic.AppRemoting.OpenXr.dll"),
+						Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.dll"));
+
+					SafeCopy(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\bin\x64\Desktop\RemotingXR.json"),
+						Path.Combine(BinariesFolder, "RemotingXR.json"));
+
+					PrivateIncludePaths.Add(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\include\openxr"));
+
+					RuntimeDependencies.Add(Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.dll"));
+					RuntimeDependencies.Add(Path.Combine(BinariesFolder, "RemotingXR.json"));
+				}
+			}
 		}
 	}
 

@@ -31,9 +31,7 @@ namespace MicrosoftOpenXR
 
 		if (remotingEnabled)
 		{
-			FString platformName = FPlatformProperties::IniPlatformName();
-			const FString RemotingJsonPath = FPaths::ProjectPluginsDir() / "MicrosoftOpenXR/ThirdParty/HolographicAppRemoting" /
-				platformName / "Win64/RemotingXR.json";
+			const FString RemotingJsonPath = FPaths::ProjectPluginsDir() / "MicrosoftOpenXR" / THIRDPARTY_BINARY_SUBFOLDER / "RemotingXR.json";
 
 			if (FPaths::FileExists(RemotingJsonPath))
 			{
