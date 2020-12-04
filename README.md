@@ -35,9 +35,12 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 # Installation
 
-## Installing the plugin from source
+## Installing the packaged plugin
 
-1. Copy the contents of MsftOpenXRGame/Plugins to [YourUnrealProjectRoot]/Plugins. The *Plugins* folder should be
+1. Download the Microsoft OpenXR plugin from the release page.
+1. If you have a Blueprint-only project then you will need to convert it to a C++ project. This can be done in the editor by going
+   to File -> Add C++ Class, selecting "None" and creating the class with the default settings.
+1. Extract the the contents of packaged Microsoft OpenXR plugin to [YourUnrealProjectRoot]/Plugins. The *Plugins* folder should be
    located at the root of your project, where the .uproject file is. Create it if it doesn't exist.
 1. If you are building the editor from Visual Studio, regenerate the Visual Studio solution file.
 
