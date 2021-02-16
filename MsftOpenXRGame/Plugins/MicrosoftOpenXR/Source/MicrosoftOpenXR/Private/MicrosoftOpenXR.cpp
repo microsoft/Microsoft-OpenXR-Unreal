@@ -155,6 +155,34 @@ void UMicrosoftOpenXRFunctionLibrary::RemoveKeywords(TArray<FString> Keywords)
 #endif
 }
 
+bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, ::IUnknown** OutPerceptionAnchor)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
+	{
+		return false;
+	}
+
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.GetPerceptionAnchorFromOpenXRAnchor((XrSpatialAnchorMSFT)AnchorID, OutPerceptionAnchor);
+#else
+	return false;
+#endif
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
+	{
+		return false;
+	}
+
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, InPerceptionAnchor);
+#else
+	return false;
+#endif
+}
+
 #undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(MicrosoftOpenXR::FMicrosoftOpenXRModule, MicrosoftOpenXR)

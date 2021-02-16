@@ -356,7 +356,8 @@ namespace MicrosoftOpenXR
 		if (!SpatialSurfaceObserver::IsSupported())
 		{
 			UE_LOG(LogHMD, Warning, TEXT("SpatialSurfaceObserver::IsSupported() returned false. No updates will occur."));
-			return false;
+			// Return true to prevent further attempts at toggling spatial mapping.
+			return true;
 		}
 
 		RequestAccessOperation = SpatialSurfaceObserver::RequestAccessAsync();

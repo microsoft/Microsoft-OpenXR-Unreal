@@ -85,6 +85,12 @@ namespace MicrosoftOpenXR
 		return InNext;
 	}
 
+	const void* FSpatialAnchorPlugin::OnBeginSession(XrSession InSession, const void* InNext)
+	{
+		Session = InSession;
+		return InNext;
+	}
+
 	IOpenXRCustomAnchorSupport* FSpatialAnchorPlugin::GetCustomAnchorSupport()
 	{
 		return this;
@@ -284,6 +290,52 @@ namespace MicrosoftOpenXR
 		if (m_spatialAnchorStore == nullptr) { return; }
 
 		m_spatialAnchorStore.Clear();
+#endif
+	}
+
+	bool FSpatialAnchorPlugin::GetPerceptionAnchorFromOpenXRAnchor(XrSpatialAnchorMSFT AnchorId, ::IUnknown** OutPerceptionAnchor)
+	{
+#if HL_ANCHOR_STORE_AVAILABLE 
+		if (!bIsLocalAnchorStoreSupported)
+		{
+			UE_LOG(LogHMD, Warning, TEXT("Attempting to get perception anchor, but local anchor store is not supported."));
+			return false;
+		}
+
+		XrResult result;
+		result = xrTryGetPerceptionAnchorFromSpatialAnchorMSFT(Session, AnchorId, reinterpret_cast<::IUnknown**>(winrt::put_abi(*OutPerceptionAnchor)));
+		if (XR_FAILED(result))
+		{
+			UE_LOG(LogHMD, Warning, TEXT("xrTryGetPerceptionAnchorFromSpatialAnchorMSFT failed.  Ignoring."));
+			return false;
+		}
+
+		return true;
+#else
+		return false;
+#endif
+	}
+
+	bool FSpatialAnchorPlugin::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
+	{
+#if HL_ANCHOR_STORE_AVAILABLE 
+		std::lock_guard<std::mutex> lock(m_spatialAnchorStoreLock);
+		if (m_spatialAnchorStore == nullptr) 
+		{ 
+			UE_LOG(LogHMD, Warning, TEXT("Attempting to store perception anchor, but local anchor store is not supported."));
+			return false; 
+		}
+
+		SpatialAnchor localAnchor = nullptr;
+		if (FAILED(InPerceptionAnchor->QueryInterface(winrt::guid_of<SpatialAnchor>(), winrt::put_abi(localAnchor))))
+		{
+			UE_LOG(LogHMD, Warning, TEXT("StorePerceptionAnchor failed to get SpatialAnchor."));
+			return false;
+		}
+
+		return m_spatialAnchorStore.TrySave(*InPinId.ToLower(), localAnchor);
+#else
+		return false;
 #endif
 	}
 
