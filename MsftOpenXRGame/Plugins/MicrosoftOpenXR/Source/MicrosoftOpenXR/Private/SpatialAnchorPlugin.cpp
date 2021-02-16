@@ -44,8 +44,8 @@ namespace MicrosoftOpenXR
 	
 	bool FSpatialAnchorPlugin::GetOptionalExtensions(TArray<const ANSICHAR*>& OutExtensions) 
 	{
-#if HL_ANCHOR_STORE_AVAILABLE 
-		OutExtensions.Add(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_PREVIEW_EXTENSION_NAME);
+#if HL_ANCHOR_STORE_AVAILABLE
+		OutExtensions.Add(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_EXTENSION_NAME);
 #endif
 		return true;
 	}
@@ -53,17 +53,18 @@ namespace MicrosoftOpenXR
 
 	const void* FSpatialAnchorPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext) 
 	{
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrCreateSpatialAnchorMSFT));
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorSpaceMSFT",(PFN_xrVoidFunction*) &xrCreateSpatialAnchorSpaceMSFT));
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrDestroySpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrDestroySpatialAnchorMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrCreateSpatialAnchorMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorSpaceMSFT",(PFN_xrVoidFunction*) &xrCreateSpatialAnchorSpaceMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrDestroySpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrDestroySpatialAnchorMSFT));
 
 #if HL_ANCHOR_STORE_AVAILABLE 
-		bIsLocalAnchorStoreSupported = IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_PREVIEW_EXTENSION_NAME);
+		bIsLocalAnchorStoreSupported = 
+			IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_EXTENSION_NAME);
 		
 		if (bIsLocalAnchorStoreSupported)
 		{
-			XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorFromPerceptionAnchorMSFT", (PFN_xrVoidFunction*) &xrCreateSpatialAnchorFromPerceptionAnchorMSFT));
-			XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrTryGetPerceptionAnchorFromSpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrTryGetPerceptionAnchorFromSpatialAnchorMSFT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorFromPerceptionAnchorMSFT", (PFN_xrVoidFunction*) &xrCreateSpatialAnchorFromPerceptionAnchorMSFT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrTryGetPerceptionAnchorFromSpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrTryGetPerceptionAnchorFromSpatialAnchorMSFT));
 
 			{
 				std::lock_guard<std::mutex> lock(m_spatialAnchorStoreLock);

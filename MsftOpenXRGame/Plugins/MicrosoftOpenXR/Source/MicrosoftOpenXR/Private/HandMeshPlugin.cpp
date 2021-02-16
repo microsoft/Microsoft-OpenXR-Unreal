@@ -32,15 +32,15 @@ namespace MicrosoftOpenXR
 		XrSystemHandTrackingPropertiesEXT HandTrackingSystemProperties{ XR_TYPE_SYSTEM_HAND_TRACKING_PROPERTIES_EXT, &HandMeshTrackingSystemProperties };
 		XrSystemProperties systemProperties{ XR_TYPE_SYSTEM_PROPERTIES, &HandTrackingSystemProperties };
 
-		XR_ENSURE(xrGetSystemProperties(InInstance, InSystem, &systemProperties));
+		XR_ENSURE_MSFT(xrGetSystemProperties(InInstance, InSystem, &systemProperties));
 
 		bool bHandMeshTrackingAvailable = HandTrackingSystemProperties.supportsHandTracking != XR_FALSE && HandMeshTrackingSystemProperties.supportsHandTrackingMesh != XR_FALSE;
 
 		if (bHandMeshTrackingAvailable)
 		{
-			XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateHandTrackerEXT", (PFN_xrVoidFunction*)&xrCreateHandTrackerEXT));
-			XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateHandMeshSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateHandMeshSpaceMSFT));
-			XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrUpdateHandMeshMSFT", (PFN_xrVoidFunction*)&xrUpdateHandMeshMSFT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateHandTrackerEXT", (PFN_xrVoidFunction*)&xrCreateHandTrackerEXT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateHandMeshSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateHandMeshSpaceMSFT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrUpdateHandMeshMSFT", (PFN_xrVoidFunction*)&xrUpdateHandMeshMSFT));
 
 			for (int i=0; i<HandCount; ++i)
 			{
@@ -102,12 +102,12 @@ namespace MicrosoftOpenXR
 			XrHandTrackerCreateInfoEXT CreateInfo{ XR_TYPE_HAND_TRACKER_CREATE_INFO_EXT };
 			CreateInfo.hand = XrHandEXT(XR_HAND_LEFT_EXT + i);
 			CreateInfo.handJointSet = XR_HAND_JOINT_SET_DEFAULT_EXT;
-			XR_ENSURE(xrCreateHandTrackerEXT(InSession, &CreateInfo, &HandState.HandTracker));
+			XR_ENSURE_MSFT(xrCreateHandTrackerEXT(InSession, &CreateInfo, &HandState.HandTracker));
 
 			XrHandMeshSpaceCreateInfoMSFT SpaceCreateInfo{ XR_TYPE_HAND_MESH_SPACE_CREATE_INFO_MSFT };
 			SpaceCreateInfo.handPoseType = XR_HAND_POSE_TYPE_TRACKED_MSFT;
 			SpaceCreateInfo.poseInHandMeshSpace = ToXrPose(FTransform::Identity, XRTrackingSystem->GetWorldToMetersScale());
-			XR_ENSURE(xrCreateHandMeshSpaceMSFT(HandState.HandTracker, &SpaceCreateInfo, &HandState.Space));
+			XR_ENSURE_MSFT(xrCreateHandMeshSpaceMSFT(HandState.HandTracker, &SpaceCreateInfo, &HandState.Space));
 		}
 
 		return InNext;
@@ -128,7 +128,7 @@ namespace MicrosoftOpenXR
 
 			XrSpaceLocation SpaceLocation { XR_TYPE_SPACE_LOCATION };
 
-			XR_ENSURE(xrLocateSpace(HandState.Space, TrackingSpace, DisplayTime, &SpaceLocation));
+			XR_ENSURE_MSFT(xrLocateSpace(HandState.Space, TrackingSpace, DisplayTime, &SpaceLocation));
 			const XrSpaceLocationFlags ValidFlags = XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT;
 
 			if ((SpaceLocation.locationFlags & ValidFlags) == ValidFlags)
@@ -147,7 +147,7 @@ namespace MicrosoftOpenXR
 				HandMesh.vertexBuffer.vertexCapacityInput = HandState.Vertices.size();
 				HandMesh.vertexBuffer.vertices = HandState.Vertices.data();
 
-				XR_ENSURE(xrUpdateHandMeshMSFT(HandState.HandTracker, &HandMeshUpdateInfo, &HandMesh));
+				XR_ENSURE_MSFT(xrUpdateHandMeshMSFT(HandState.HandTracker, &HandMeshUpdateInfo, &HandMesh));
 				
 
 				if (HandMesh.indexBufferChanged)
