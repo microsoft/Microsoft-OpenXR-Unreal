@@ -15,6 +15,7 @@
 #include "ShaderCore.h"
 #include "SpeechPlugin.h"
 #include "SpatialMappingPlugin.h"
+#include "SecondaryViewConfiguration.h"
 
 #define LOCTEXT_NAMESPACE "FMicrosoftOpenXRModule"
 
@@ -29,6 +30,7 @@ namespace MicrosoftOpenXR
 		{
 			SpatialAnchorPlugin.Register();
 			HandMeshPlugin.Register();
+			SecondaryViewConfigurationPlugin.Register();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 			QRTrackingPlugin.Register();
 			LocatableCamPlugin.Register();
@@ -54,6 +56,7 @@ namespace MicrosoftOpenXR
 
 			SpatialAnchorPlugin.Unregister();
 			HandMeshPlugin.Unregister();
+			SecondaryViewConfigurationPlugin.Unregister();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 			QRTrackingPlugin.Unregister();
 			LocatableCamPlugin.Unregister();
@@ -70,6 +73,7 @@ namespace MicrosoftOpenXR
 #endif
 		}
 
+		FSecondaryViewConfigurationPlugin SecondaryViewConfigurationPlugin;
 		FHandMeshPlugin HandMeshPlugin;
 		FSpatialAnchorPlugin SpatialAnchorPlugin;
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
@@ -152,6 +156,34 @@ void UMicrosoftOpenXRFunctionLibrary::RemoveKeywords(TArray<FString> Keywords)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpeechPlugin.RemoveKeywords(Keywords);
+#endif
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, ::IUnknown** OutPerceptionAnchor)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
+	{
+		return false;
+	}
+
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.GetPerceptionAnchorFromOpenXRAnchor((XrSpatialAnchorMSFT)AnchorID, OutPerceptionAnchor);
+#else
+	return false;
+#endif
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
+	{
+		return false;
+	}
+
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, InPerceptionAnchor);
+#else
+	return false;
 #endif
 }
 

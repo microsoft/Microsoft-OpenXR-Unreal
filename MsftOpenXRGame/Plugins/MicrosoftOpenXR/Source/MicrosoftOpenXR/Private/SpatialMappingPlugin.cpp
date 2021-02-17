@@ -30,16 +30,16 @@ namespace MicrosoftOpenXR
 
 	bool FSpatialMappingPlugin::GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions)
 	{
-		OutExtensions.Add(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_PREVIEW_EXTENSION_NAME);
 		OutExtensions.Add(XR_MSFT_SPATIAL_ANCHOR_EXTENSION_NAME);
+		OutExtensions.Add(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_EXTENSION_NAME);
 		return true;
 	}
 
 	const void* FSpatialMappingPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext)
 	{
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorFromPerceptionAnchorMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialAnchorFromPerceptionAnchorMSFT));
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialAnchorSpaceMSFT));
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrDestroySpatialAnchorMSFT", (PFN_xrVoidFunction*)&xrDestroySpatialAnchorMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorFromPerceptionAnchorMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialAnchorFromPerceptionAnchorMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialAnchorSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialAnchorSpaceMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrDestroySpatialAnchorMSFT", (PFN_xrVoidFunction*)&xrDestroySpatialAnchorMSFT));
 
 		return InNext;
 	}
@@ -356,7 +356,8 @@ namespace MicrosoftOpenXR
 		if (!SpatialSurfaceObserver::IsSupported())
 		{
 			UE_LOG(LogHMD, Warning, TEXT("SpatialSurfaceObserver::IsSupported() returned false. No updates will occur."));
-			return false;
+			// Return true to prevent further attempts at toggling spatial mapping.
+			return true;
 		}
 
 		RequestAccessOperation = SpatialSurfaceObserver::RequestAccessAsync();

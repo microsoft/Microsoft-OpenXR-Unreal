@@ -66,7 +66,7 @@ namespace MicrosoftOpenXR
 
 	const void* FLocatableCamPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext)
 	{
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialGraphNodeSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialGraphNodeSpaceMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialGraphNodeSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialGraphNodeSpaceMSFT));
 
 		static FName SystemName(TEXT("OpenXR"));
 		if (GEngine->XRSystem.IsValid() && (GEngine->XRSystem->GetSystemName() == SystemName))
@@ -104,7 +104,7 @@ namespace MicrosoftOpenXR
 			check(sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId) == sizeof(FGuid));
 			FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &DynamicNode.GetValue().Key, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
 
-			XR_ENSURE(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Space));
+			XR_ENSURE_MSFT(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Space));
 		}
 
 		// We leave our pointer null until there's an image to wrap around, so create on demand
@@ -121,7 +121,7 @@ namespace MicrosoftOpenXR
 		if (Space != XR_NULL_HANDLE)
 		{
 			XrSpaceLocation SpaceLocation{ XR_TYPE_SPACE_LOCATION };
-			XR_ENSURE(xrLocateSpace(Space, TrackingSpace, DisplayTime, &SpaceLocation));
+			XR_ENSURE_MSFT(xrLocateSpace(Space, TrackingSpace, DisplayTime, &SpaceLocation));
 			const XrSpaceLocationFlags ValidFlags = XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT;
 			if ((SpaceLocation.locationFlags & ValidFlags) == ValidFlags)
 			{

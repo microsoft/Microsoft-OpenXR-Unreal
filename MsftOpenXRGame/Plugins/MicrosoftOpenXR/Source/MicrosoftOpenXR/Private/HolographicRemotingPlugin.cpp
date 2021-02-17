@@ -164,7 +164,7 @@ namespace MicrosoftOpenXR
 		}
 
 		PFN_xrRemotingSetContextPropertiesMSFT setContextProperties;
-		XR_ENSURE(
+		XR_ENSURE_MSFT(
 			xrGetInstanceProcAddr(Instance, "xrRemotingSetContextPropertiesMSFT", (PFN_xrVoidFunction*)&setContextProperties));
 
 		// Set remoting properties - this must be done while disconnected.
@@ -197,7 +197,7 @@ namespace MicrosoftOpenXR
 			listenInfo.secureConnection = false;
 
 			PFN_xrRemotingListenMSFT remotingListen;
-			XR_ENSURE(xrGetInstanceProcAddr(Instance, "xrRemotingListenMSFT", (PFN_xrVoidFunction*)&remotingListen));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(Instance, "xrRemotingListenMSFT", (PFN_xrVoidFunction*)&remotingListen));
 
 			// Connect for remote connection.
 			if (XR_FAILED(remotingListen(Instance, System, &listenInfo)))
@@ -214,7 +214,7 @@ namespace MicrosoftOpenXR
 			connectInfo.secureConnection = false;
 
 			PFN_xrRemotingConnectMSFT remotingConnect;
-			XR_ENSURE(xrGetInstanceProcAddr(Instance, "xrRemotingConnectMSFT", (PFN_xrVoidFunction*)&remotingConnect));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(Instance, "xrRemotingConnectMSFT", (PFN_xrVoidFunction*)&remotingConnect));
 
 			// Connect to remote device.
 			if (XR_FAILED(remotingConnect(Instance, System, &connectInfo)))
@@ -240,7 +240,7 @@ namespace MicrosoftOpenXR
 		}
 
 		PFN_xrRemotingDisconnectMSFT remotingDisconnect;
-		XR_ENSURE(xrGetInstanceProcAddr(Instance, "xrRemotingDisconnectMSFT", (PFN_xrVoidFunction*)&remotingDisconnect));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(Instance, "xrRemotingDisconnectMSFT", (PFN_xrVoidFunction*)&remotingDisconnect));
 
 		// Disconnect from remote device.
 		XrRemotingDisconnectInfoMSFT disconnectInfo{ static_cast<XrStructureType>(XR_TYPE_REMOTING_DISCONNECT_INFO_MSFT) };
