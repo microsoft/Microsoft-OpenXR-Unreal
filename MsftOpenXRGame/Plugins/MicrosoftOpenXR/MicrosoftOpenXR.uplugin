@@ -21,6 +21,15 @@
 	],
 	"Modules": [
 		{
+			"Name": "NuGetModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"WhitelistPlatforms": [
+				"Win64",
+				"HoloLens"
+			]
+		},
+		{
 			"Name": "MicrosoftOpenXR",
 			"Type": "Runtime",
 			"LoadingPhase": "PostConfigInit"
@@ -39,6 +48,14 @@
 			"LoadingPhase": "PostEngineInit",
 			"WhitelistPlatforms": [
 				"Win64"
+			]
+		},
+		{
+			"Name": "AzureSpatialAnchorsForOpenXR",
+			"Type": "Runtime",
+			"WhitelistPlatforms": [
+				"Win64",
+				"HoloLens"
 			]
 		}
 	],
@@ -68,6 +85,14 @@
 			"Enabled": true,
 			"WhitelistPlatforms": [
 				"Win64"
+			]
+		},
+		{
+			"Name": "AzureSpatialAnchors",
+			"Enabled": true,
+			"WhitelistPlatforms": [
+				"Win64",
+				"HoloLens"
 			]
 		}
 	]

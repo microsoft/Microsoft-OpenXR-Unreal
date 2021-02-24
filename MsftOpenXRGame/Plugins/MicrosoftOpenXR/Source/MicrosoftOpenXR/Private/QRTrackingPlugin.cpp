@@ -50,7 +50,7 @@ namespace MicrosoftOpenXR
 
 	const void* FQRTrackingPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext)
 	{
-		XR_ENSURE(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialGraphNodeSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialGraphNodeSpaceMSFT));
+		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrCreateSpatialGraphNodeSpaceMSFT", (PFN_xrVoidFunction*)&xrCreateSpatialGraphNodeSpaceMSFT));
 
 		QRCodeHolder = IModularFeatures::Get().GetModularFeatureImplementations<IOpenXRARTrackedGeometryHolder>(IOpenXRARTrackedGeometryHolder::GetModularFeatureName())[0];
 
@@ -252,11 +252,11 @@ namespace MicrosoftOpenXR
 				check(sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId) == sizeof(FGuid));
 				FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &Context->SpatialGraphNodeId, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
 
-				XR_ENSURE(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Context->Space));
+				XR_ENSURE_MSFT(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Context->Space));
 			}
 
 			XrSpaceLocation SpaceLocation{ XR_TYPE_SPACE_LOCATION };
-			XR_ENSURE(xrLocateSpace(Context->Space, TrackingSpace, DisplayTime, &SpaceLocation));
+			XR_ENSURE_MSFT(xrLocateSpace(Context->Space, TrackingSpace, DisplayTime, &SpaceLocation));
 			const XrSpaceLocationFlags ValidFlags = XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT;
 			if ((SpaceLocation.locationFlags & ValidFlags) == ValidFlags)
 			{

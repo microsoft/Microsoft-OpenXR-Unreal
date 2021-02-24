@@ -27,6 +27,8 @@ The Microsoft OpenXR plugin provides the following additional functionality:
 * QR code tracking
 * Spatial mapping providing a mesh of the physical world
 * Voice input
+* Azure Spatial Anchors
+* Secondary View Configuration (requires 4.26.2+)
 
 If you're new to Mixed Reality development in Unreal, visit the
 [Unreal development journey](https://docs.microsoft.com/windows/mixed-reality/unreal-development-overview)

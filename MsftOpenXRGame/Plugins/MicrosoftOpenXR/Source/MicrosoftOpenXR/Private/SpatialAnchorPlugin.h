@@ -27,6 +27,12 @@
 
 namespace MicrosoftOpenXR
 {
+	struct SAnchorMSFT
+	{
+		XrSpatialAnchorMSFT AnchorId;
+		XrSpace Space;
+	};
+
 	class FSpatialAnchorPlugin : public IOpenXRExtensionPlugin, public IOpenXRCustomAnchorSupport
 	{
 	public:
@@ -38,6 +44,7 @@ namespace MicrosoftOpenXR
 		virtual bool GetOptionalExtensions(TArray<const ANSICHAR*>& OutExtensions) override;
 
 		virtual const void* OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext) override;
+		virtual const void* OnBeginSession(XrSession InSession, const void* InNext) override;
 
 		virtual IOpenXRCustomAnchorSupport* GetCustomAnchorSupport() override;
 
@@ -59,13 +66,11 @@ namespace MicrosoftOpenXR
 
 		virtual void RemoveAllSavedARPins(XrSession InSession) override;
 
+		bool GetPerceptionAnchorFromOpenXRAnchor(XrSpatialAnchorMSFT AnchorId, ::IUnknown** OutPerceptionAnchor);
+		bool StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor);
+
 	private:
-		
-		struct SAnchorMSFT
-		{
-			XrSpatialAnchorMSFT AnchorId;
-			XrSpace Space;
-		};
+		XrSession Session;
 
 		PFN_xrCreateSpatialAnchorMSFT xrCreateSpatialAnchorMSFT;
 		PFN_xrDestroySpatialAnchorMSFT xrDestroySpatialAnchorMSFT;
