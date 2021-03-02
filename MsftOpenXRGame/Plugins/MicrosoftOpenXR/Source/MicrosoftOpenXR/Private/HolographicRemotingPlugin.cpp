@@ -31,7 +31,8 @@ namespace MicrosoftOpenXR
 
 		if (remotingEnabled)
 		{
-			const FString RemotingJsonPath = FPaths::ProjectPluginsDir() / "MicrosoftOpenXR" / THIRDPARTY_BINARY_SUBFOLDER / "RemotingXR.json";
+			const FString PluginBaseDir = IPluginManager::Get().FindPlugin("MicrosoftOpenXR")->GetBaseDir();
+			const FString RemotingJsonPath = PluginBaseDir / THIRDPARTY_BINARY_SUBFOLDER / "RemotingXR.json";
 
 			if (FPaths::FileExists(RemotingJsonPath))
 			{

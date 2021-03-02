@@ -23,8 +23,9 @@ namespace MicrosoftOpenXR
 	{
 		IModularFeatures::Get().RegisterModularFeature(IOpenXRExtensionPlugin::GetModularFeatureName(), this);
 #if PLATFORM_WINDOWS
+		const FString PluginBaseDir = IPluginManager::Get().FindPlugin("MicrosoftOpenXR")->GetBaseDir();
 		const FString DllName = "Microsoft.MixedReality.QR.dll";
-		const FString LibrariesDir = FPaths::ProjectPluginsDir() / "MicrosoftOpenXR"/ THIRDPARTY_BINARY_SUBFOLDER;
+		const FString LibrariesDir = PluginBaseDir / THIRDPARTY_BINARY_SUBFOLDER;
 
 		FPlatformProcess::PushDllDirectory(*LibrariesDir);
 		if (!FPlatformProcess::GetDllHandle(*DllName))
