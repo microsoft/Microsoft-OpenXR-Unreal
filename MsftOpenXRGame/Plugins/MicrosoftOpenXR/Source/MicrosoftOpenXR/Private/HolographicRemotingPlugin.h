@@ -8,6 +8,8 @@
 
 #if SUPPORTS_REMOTING
 
+#include "Interfaces/IPluginManager.h"
+
 #include "OpenXRCommon.h"
 #include "openxr_msft_holographic_remoting.h "
 

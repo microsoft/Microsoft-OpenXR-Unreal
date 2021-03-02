@@ -4,6 +4,8 @@
 #pragma once
 
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+#include "Interfaces/IPluginManager.h"
+
 #include "OpenXRCommon.h"
 
 #include "IAzureSpatialAnchors.h"

@@ -19,8 +19,8 @@ void FAzureSpatialAnchorsForOpenXR::StartupModule()
 {
 	IModularFeatures::Get().RegisterModularFeature(IAzureSpatialAnchors::GetModularFeatureName(), static_cast<IAzureSpatialAnchors*>(this));
 
-	const FString LibrariesDir = FPaths::ProjectPluginsDir() / "MicrosoftOpenXR" / THIRDPARTY_BINARY_SUBFOLDER;
-	FString PackageRelativePath(LibrariesDir);
+	const FString PluginBaseDir = IPluginManager::Get().FindPlugin("MicrosoftOpenXR")->GetBaseDir();
+	FString PackageRelativePath = PluginBaseDir / THIRDPARTY_BINARY_SUBFOLDER;
 
 	// On HoloLens, DLLs must be loaded relative to the package with no ".."'s in the path. 
 	// If using FPlatformProcess::PushDLLDirectory, the library path must be made relative to the RootDir.

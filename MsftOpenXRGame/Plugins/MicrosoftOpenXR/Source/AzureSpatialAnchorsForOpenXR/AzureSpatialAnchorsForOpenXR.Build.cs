@@ -33,6 +33,7 @@ namespace UnrealBuildTool.Rules
 					"HeadMountedDisplay",
 					"OpenXRHMD",
 					"NuGetModule",
+					"Projects",
 					"MicrosoftOpenXR"
 				}
 			);
