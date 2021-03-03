@@ -15,10 +15,10 @@ struct FKeywordInput
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MicrosoftOpenXR|OpenXR")
 	FString Keyword;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MicrosoftOpenXR|OpenXR")
 	FInputActionHandlerDynamicSignature Callback;
 };
 
