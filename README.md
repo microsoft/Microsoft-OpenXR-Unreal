@@ -37,18 +37,10 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 # Installation
 
-## Installing the packaged plugin
-
-1. Download the Microsoft OpenXR plugin from the [release page](https://github.com/microsoft/Microsoft-OpenXR-Unreal/releases).
-1. If you have a Blueprint-only project then you will need to convert it to a C++ project. This can be done in the editor by going
-   to File -> Add C++ Class, selecting "None" and creating the class with the default settings.
-1. Extract the contents of the packaged Microsoft OpenXR plugin to [YourUnrealProjectRoot]/Plugins. The *Plugins* folder should be
-   located at the root of your project, where the .uproject file is. Create it if it doesn't exist.
-1. If you are building the editor from Visual Studio, regenerate the Visual Studio solution file.
-
 ## Installing the plugin from the Unreal Marketplace
 
-Coming soon!
+1. Install the [Microsoft OpenXR](https://www.unrealengine.com/marketplace/en-US/product/ef8930ca860148c498b46887da196239) plugin from the Unreal Engine Marketplace to your engine. 
+1. Open Unreal Engine, go to **Project Settings** > **Plugins** and search for "Microsoft OpenXR". Verify that the plugin has been enabled. You may need to restart the engine for changes to take effect. 
 
 # Feedback and contributions
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.
