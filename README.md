@@ -35,14 +35,24 @@ If you're new to Mixed Reality development in Unreal, visit the
 in the Microsoft Docs. The Unreal development journey is specifically tailored to walk new developers
 through the installation, core concepts, and usage of the Microsoft OpenXR plugin.
 
-# Installation
+# Using the Microsoft OpenXR plugin
 
-## Installing the plugin from the Unreal Marketplace
+## Install the plugin from the Unreal Marketplace
 
-1. Install the [Microsoft OpenXR](https://www.unrealengine.com/marketplace/en-US/product/ef8930ca860148c498b46887da196239) plugin from the Unreal Engine Marketplace to your engine. 
-1. Open Unreal Engine, go to **Project Settings** > **Plugins** and search for "Microsoft OpenXR". Verify that the plugin has been enabled. You may need to restart the engine for changes to take effect. 
+1. Install the [Microsoft OpenXR](https://www.unrealengine.com/marketplace/product/ef8930ca860148c498b46887da196239) plugin from the Unreal Engine Marketplace to your engine. 
+1. Open Unreal Engine, go to **Project Settings** > **Plugins** and search for "Microsoft OpenXR". Verify that the plugin has been enabled. Note that the "Microsoft Windows Mixed Reality" plugin must be disabled for OpenXR to work. You may need to restart the engine for changes to take effect. 
+
+## Try the example project
+
+If you want to see how each of the features available in OpenXR can be used, check out the example project (/MsftOpenXRGame) contained in this repository. This project has examples of how to use each of the features listed above, as well as a copy of the Microsoft OpenXR plugin in the MsftOpenXRGame/Plugins directory. 
+
+1. Clone this repository.
+2. Navigate to the MsftOpenXRGame folder and double-click MsftOpenXRGame.uproject to open the project in Unreal Engine. 
+3. See the documention for instructions on how to [stream](https://docs.microsoft.com/en-us/windows/mixed-reality/develop/unreal/unreal-streaming?tabs=openxr) or [package and deploy](https://docs.microsoft.com/en-us/windows/mixed-reality/develop/unreal/unreal-deploying) to device
 
 # Feedback and contributions
+If you have a feature request or run into issues using the plugin, please [file an issue](https://github.com/microsoft/Microsoft-OpenXR-Unreal/issues). 
+
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
 When you submit a pull request, a CLA-bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
