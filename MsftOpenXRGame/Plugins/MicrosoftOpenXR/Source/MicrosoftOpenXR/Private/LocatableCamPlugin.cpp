@@ -526,7 +526,7 @@ namespace MicrosoftOpenXR
 
 	UARTexture* FLocatableCamPlugin::OnGetARTexture(EARTextureType TextureType) const
 	{ 
-		if (TextureType == EARTextureType::CameraImage)
+		if (SharedTextureHolder && TextureType == EARTextureType::CameraImage)
 		{
 			return SharedTextureHolder->CameraImage;
 		}
