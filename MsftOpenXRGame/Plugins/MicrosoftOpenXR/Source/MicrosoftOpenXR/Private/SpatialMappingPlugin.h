@@ -60,6 +60,7 @@ namespace MicrosoftOpenXR
 
 	struct MeshLocalizationData
 	{
+		winrt::Windows::Foundation::DateTime UpdateTime = winrt::Windows::Foundation::DateTime::min();
 		FTransform LastKnownTransform = FTransform::Identity;
 		EARTrackingState LastKnownTrackingState = EARTrackingState::NotTracking;
 		winrt::Windows::Perception::Spatial::SpatialCoordinateSystem CoordinateSystem;
