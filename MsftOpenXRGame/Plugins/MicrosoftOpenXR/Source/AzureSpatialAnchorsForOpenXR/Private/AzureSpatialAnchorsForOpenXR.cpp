@@ -702,18 +702,10 @@ EAzureSpatialAnchorsResult FAzureSpatialAnchorsForOpenXR::GetActiveWatchers(TArr
 
 	OutWatcherIDs.Reset(Watchers.Size());
 	int32_t Index = 0;
-#if _DEBUG
-	// only lock and test the assert below in debug.
-	auto lock = std::unique_lock<std::mutex>(m_watcherMapMutex);
-#endif
+
 	for (uint32_t i = 0; i < Watchers.Size(); ++i)
 	{
 		OutWatcherIDs.Add(Watchers.GetAt(i).Identifier());
-
-		// All watchers should be in the map.
-#if _DEBUG
-		assert(m_watcherMap.find(ID) != m_watcherMap.end());
-#endif
 	}
 
 	return EAzureSpatialAnchorsResult::Success;
