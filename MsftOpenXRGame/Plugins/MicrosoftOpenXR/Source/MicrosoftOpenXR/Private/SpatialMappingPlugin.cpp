@@ -153,7 +153,7 @@ namespace MicrosoftOpenXR
 				if (FindMeshTransform(data.second->AnchorSpace, DisplayTime, TrackingSpace, MeshToCachedAnchorTransform, Transform, IsTracking))
 				{
 					// Add to the anchor localization data, so the next time this mesh is updated it will have a direct entry in the map.
-					AnchorLocalizationData.insert({ MeshID, data.second });
+					AnchorLocalizationData.insert_or_assign(MeshID, data.second);
 					return true;
 				}
 			}
@@ -199,7 +199,7 @@ namespace MicrosoftOpenXR
 		if (cachedAnchorDataForThisMesh == AnchorLocalizationData.end())
 		{
 			// Cache localization data to compare against future meshes.
-			AnchorLocalizationData.insert({ MeshID, MakeShared<WMRAnchorLocalizationData>(AnchorSpace, MeshCoordinateSystem) });
+			AnchorLocalizationData.insert_or_assign(MeshID, MakeShared<WMRAnchorLocalizationData>(AnchorSpace, MeshCoordinateSystem));
 		}
 		else
 		{
@@ -486,6 +486,17 @@ namespace MicrosoftOpenXR
 			FGuid MeshId = WMRUtility::GUIDToFGuid(Id);
 			ObservedSurfacesThisUpdate.push_back(MeshId);
 			SpatialSurfaceInfo SurfaceInfo = KVPair.Value();
+			winrt::Windows::Foundation::DateTime UpdateTime = SurfaceInfo.UpdateTime();
+
+			const auto& PrevMeshIterator = UniqueMeshes.find(MeshId);
+			bool bIsAdd = PrevMeshIterator == UniqueMeshes.end();
+			bool bIsUpdate = !bIsAdd && PrevMeshIterator->second.UpdateTime != UpdateTime;
+
+			// This is an old mesh with no new data.
+			if (!bIsAdd && !bIsUpdate)
+			{
+				continue;
+			}
 
 			winrt::Windows::Foundation::IAsyncOperation<SpatialSurfaceMesh> ComputeMeshAsyncOperation =
 				SurfaceInfo.TryComputeLatestMeshAsync(TriangleDensity, MeshOptions);
@@ -494,7 +505,7 @@ namespace MicrosoftOpenXR
 				continue;
 			}
 
-			ComputeMeshAsyncOperation.Completed([this, MeshId](winrt::Windows::Foundation::IAsyncOperation<SpatialSurfaceMesh> asyncOperation, winrt::Windows::Foundation::AsyncStatus status)
+			ComputeMeshAsyncOperation.Completed([this, MeshId, UpdateTime, bIsUpdate, PrevMeshIterator](winrt::Windows::Foundation::IAsyncOperation<SpatialSurfaceMesh> asyncOperation, winrt::Windows::Foundation::AsyncStatus status)
 			{
 				if (asyncOperation.Status() == winrt::Windows::Foundation::AsyncStatus::Completed)
 				{
@@ -502,43 +513,41 @@ namespace MicrosoftOpenXR
 					if (SurfaceMesh != nullptr)
 					{
 						TrackedMeshHolder->StartMeshUpdates();
-						
+
+						std::lock_guard<std::mutex> lock(MeshRefsLock);
+
 						FOpenXRMeshUpdate* MeshUpdate = TrackedMeshHolder->AllocateMeshUpdate(MeshId);
 						MeshUpdate->Type = EARObjectClassification::World;
 						CopyMeshData(MeshUpdate, SurfaceMesh);
 
-						const auto& it = UniqueMeshes.find(MeshId);
-						if (it != UniqueMeshes.end())
+						if (bIsUpdate)
 						{
 							// If a mesh entry already existed for this spatial mesh, use the last known transform for the first update to keep it close to where it was previously.
-							MeshUpdate->LocalToTrackingTransform = it->second.LastKnownTransform;
-							MeshUpdate->TrackingState = it->second.LastKnownTrackingState;
+							MeshUpdate->LocalToTrackingTransform = PrevMeshIterator->second.LastKnownTransform;
+							MeshUpdate->TrackingState = PrevMeshIterator->second.LastKnownTrackingState;
 
 							// Update the cached mesh data
-							std::lock_guard<std::mutex> lock(MeshRefsLock);
-							it->second.CoordinateSystem = SurfaceMesh.CoordinateSystem();
-							it->second.CollisionInfo.UpdateVertices(MeshUpdate->Vertices, MeshUpdate->Indices);
+							PrevMeshIterator->second.CoordinateSystem = SurfaceMesh.CoordinateSystem();
+							PrevMeshIterator->second.CollisionInfo.UpdateVertices(MeshUpdate->Vertices, MeshUpdate->Indices);
 						}
 						else
 						{
-							// This is the first time observing this mesh
-							std::lock_guard<std::mutex> lock(MeshRefsLock);
-							// Guarantee the mesh is not seen until a valid transform has been found.
+							// If this is a new mesh, guarantee the mesh is not seen until a valid transform has been found.
 							FTransform TempTransform = FTransform::Identity;
 							TempTransform.SetScale3D(FVector::ZeroVector);
-							
+
 							// Don't set the tracking state until the LocalToTrackingTransform is identified in UpdateDeviceLocations.
-							MeshUpdate->TrackingState = EARTrackingState::NotTracking;
-
-							UniqueMeshes.insert({ MeshId, MeshLocalizationData { 
-								TempTransform, 
-								EARTrackingState::NotTracking, 
-								SurfaceMesh.CoordinateSystem(), 
-								TrackedGeometryCollision(MeshUpdate->Vertices, MeshUpdate->Indices) 
-								} });
-
 							MeshUpdate->LocalToTrackingTransform = TempTransform;
+							MeshUpdate->TrackingState = EARTrackingState::NotTracking;
 						}
+
+						UniqueMeshes.insert_or_assign(MeshId, MeshLocalizationData{
+							UpdateTime,
+							MeshUpdate->LocalToTrackingTransform,
+							MeshUpdate->TrackingState,
+							SurfaceMesh.CoordinateSystem(),
+							TrackedGeometryCollision(MeshUpdate->Vertices, MeshUpdate->Indices)
+							});
 
 						TrackedMeshHolder->EndMeshUpdates();
 					}
@@ -554,7 +563,7 @@ namespace MicrosoftOpenXR
 			std::vector<FGuid> MeshesToRemove = std::vector<FGuid>();
 			for (const auto& Mesh : UniqueMeshes)
 			{
-				if (std::find(ObservedSurfacesThisUpdate.begin(), 
+				if (std::find(ObservedSurfacesThisUpdate.begin(),
 					ObservedSurfacesThisUpdate.end(), Mesh.first) == ObservedSurfacesThisUpdate.end())
 				{
 					// Cached mesh was not found, it has been disposed.
