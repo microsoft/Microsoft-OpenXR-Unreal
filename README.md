@@ -40,11 +40,14 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 ## Install the plugin from the Unreal Marketplace
 
 1. Install the [Microsoft OpenXR](https://www.unrealengine.com/marketplace/product/ef8930ca860148c498b46887da196239) plugin from the Unreal Engine Marketplace to your engine. 
-1. Open Unreal Engine, go to **Project Settings** > **Plugins** and search for "Microsoft OpenXR". Verify that the plugin has been enabled. Note that the "Microsoft Windows Mixed Reality" plugin must be disabled for OpenXR to work. You may need to restart the engine for changes to take effect. 
+1. Open Unreal Engine, go to **Project Settings** > **Plugins** and search for "Microsoft OpenXR". Verify that the plugin has been enabled. You may need to restart the engine for changes to take effect.
+   > :warning: The "Microsoft Windows Mixed Reality" plugin must be disabled in your project for OpenXR to work.
 
 ## Try the example project
 
-If you want to see how each of the features available in OpenXR can be used, check out the example project (/MsftOpenXRGame) contained in this repository. This project has examples of how to use each of the features listed above, as well as a copy of the Microsoft OpenXR plugin in the MsftOpenXRGame/Plugins directory. 
+If you want to see how each of the features available in OpenXR can be used, check out the example project (/MsftOpenXRGame) contained in this repository. This project has examples of how to use each of the features listed above, as well as a copy of the Microsoft OpenXR plugin in the MsftOpenXRGame/Plugins directory.
+
+> :warning: This example project embeds the source code for the Microsoft OpenXR plugin which conflicts with the Microsoft OpenXR plugin installed from the Unreal Marketplace. The Microsoft OpenXR plugin from the Unreal Marketplace must be uninstalled before opening the example project. This can be done by clicking the "Installed Plugins" link below the engine in your library.
 
 1. Clone this repository.
 2. Navigate to the MsftOpenXRGame folder and double-click MsftOpenXRGame.uproject to open the project in Unreal Engine. 
