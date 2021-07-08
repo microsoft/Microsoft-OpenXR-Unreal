@@ -221,6 +221,14 @@ namespace MicrosoftOpenXR
 
 	void FSpatialMappingPlugin::UpdateDeviceLocations(XrSession InSession, XrTime DisplayTime, XrSpace TrackingSpace)
 	{
+		if (ShouldStartSpatialMapping())
+		{
+			StartMeshObserver();
+
+			// No meshes will be available immediately after starting the mesh observer, so we can skip this frame.
+			return;
+		}
+
 		std::map<FGuid, MeshLocalizationData>::iterator Mesh;
 
 		{
@@ -282,19 +290,23 @@ namespace MicrosoftOpenXR
 	{
 		if (On)
 		{
-			if (!bGenerateSRMeshes)
+			if (!SpatialSurfaceObserver::IsSupported())
 			{
-				UE_LOG(LogHMD, Log, TEXT("Must enable Generate Mesh Data From Tracked Geometry in the ARSessionConfig to use Spatial Mapping."));
-				return false;
+				UE_LOG(LogHMD, Warning, TEXT("SpatialSurfaceObserver is not supported on this platform, not attempting to toggle spatial mapping."));
+				// Return true to prevent further attempts at toggling spatial mapping.
+				return true;
 			}
 
-			return StartMeshObserver();
+			// Set a flag to start spatial mapping in UpdateDeviceLocations when able to.
+			bShouldStartSpatialMapping = true;
 		}
 		else
 		{
+			bShouldStartSpatialMapping = false;
 			StopMeshObserver();
 		}
 
+		// Always return true, since we will attempt to enable spatial mapping in UpdateDeviceLocations based on the toggle flag.
 		return true;
 	}
 
@@ -337,6 +349,22 @@ namespace MicrosoftOpenXR
 		bGenerateSRMeshes = SessionConfig->bGenerateMeshDataFromTrackedGeometry;
 	}
 
+	bool FSpatialMappingPlugin::ShouldStartSpatialMapping()
+	{
+		return bShouldStartSpatialMapping
+			&& TrackedMeshHolder != nullptr
+			&& bGenerateSRMeshes
+			&& !IsSpatialMappingStartingOrStarted();
+	}
+
+	bool FSpatialMappingPlugin::IsSpatialMappingStartingOrStarted()
+	{
+		std::lock_guard<std::mutex> lock(MeshRefsLock);
+		return SurfaceObserver != nullptr ||
+			(RequestAccessOperation != nullptr &&
+				RequestAccessOperation.Status() == winrt::Windows::Foundation::AsyncStatus::Started);
+	}
+
 	bool FSpatialMappingPlugin::StartMeshObserver()
 	{
 		if (TrackedMeshHolder == nullptr)
@@ -344,10 +372,7 @@ namespace MicrosoftOpenXR
 			return false;
 		}
 		
-		std::lock_guard<std::mutex> lock(MeshRefsLock);
-		if (SurfaceObserver != nullptr ||
-			(RequestAccessOperation != nullptr &&
-				RequestAccessOperation.Status() == winrt::Windows::Foundation::AsyncStatus::Started))
+		if (IsSpatialMappingStartingOrStarted())
 		{
 			UE_LOG(LogHMD, Log, TEXT("Attempting to call StartMeshObserver more than once."));
 			return true;
@@ -360,6 +385,7 @@ namespace MicrosoftOpenXR
 			return true;
 		}
 
+		std::lock_guard<std::mutex> lock(MeshRefsLock);
 		RequestAccessOperation = SpatialSurfaceObserver::RequestAccessAsync();
 		RequestAccessOperation.Completed([=](auto&& asyncInfo, auto&& asyncStatus)
 		{
@@ -369,6 +395,8 @@ namespace MicrosoftOpenXR
 				SurfaceObserver = SpatialSurfaceObserver();
 				if (SurfaceObserver != nullptr)
 				{
+					// Spatial mapping has now started, reset the start flag.
+					bShouldStartSpatialMapping = false;
 					UpdateBoundingVolume();
 
 					check(!OnChangeEventToken);

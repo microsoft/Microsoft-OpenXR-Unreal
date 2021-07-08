@@ -87,6 +87,7 @@ namespace MicrosoftOpenXR
 		std::mutex MeshRefsLock;
 		winrt::event_token OnChangeEventToken;
 
+		bool bShouldStartSpatialMapping = false;
 		bool bGenerateSRMeshes = false;
 		float VolumeSize = 20.0f;
 		float TriangleDensity = 500.0f;
@@ -112,6 +113,9 @@ namespace MicrosoftOpenXR
 
 		void OnStartARSession(class UARSessionConfig* SessionConfig) override;
 
+		// Returns true if spatial mapping is desired and ready to start but not yet enabled or started.
+		bool ShouldStartSpatialMapping();
+		bool IsSpatialMappingStartingOrStarted();
 		bool StartMeshObserver();
 		void StopMeshObserver();
 
