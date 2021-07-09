@@ -551,6 +551,11 @@ namespace MicrosoftOpenXR
 
 						FOpenXRMeshUpdate* MeshUpdate = TrackedMeshHolder->AllocateMeshUpdate(MeshId);
 						MeshUpdate->Type = EARObjectClassification::World;
+						// 4.27 adds a new mesh usage flag.
+						// To work with the physics engine, collision must be included.
+#if !UE_VERSION_OLDER_THAN(4, 27, 0)
+						MeshUpdate->SpatialMeshUsageFlags = (EARSpatialMeshUsageFlags)((int32)EARSpatialMeshUsageFlags::Visible | (int32)EARSpatialMeshUsageFlags::Collision);
+#endif
 						CopyMeshData(MeshUpdate, SurfaceMesh);
 
 						if (bIsUpdate)
