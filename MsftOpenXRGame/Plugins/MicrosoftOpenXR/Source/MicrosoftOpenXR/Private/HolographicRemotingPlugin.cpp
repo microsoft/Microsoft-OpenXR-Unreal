@@ -254,14 +254,20 @@ namespace MicrosoftOpenXR
 
 	void FHolographicRemotingPlugin::SetRemotingStatusText(FString message, FLinearColor statusColor)
 	{
+		UE_LOG(LogHMD, Log, TEXT("HolographicRemotingPlugin::SetRemotingStatusText: %s"), *message);
+
+		// This function may be called before the world is initialized, which can cause the OpenXRRuntimeSettings to improperly initialize.
+		if (!GWorld)
+		{
+			return;
+		}
+
 #if WITH_EDITOR
 		if (UMicrosoftOpenXRRuntimeSettings::Get() != nullptr)
 		{
 			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingStatusChanged.ExecuteIfBound(message, statusColor);
 		}
 #endif
-
-		UE_LOG(LogHMD, Log, TEXT("HolographicRemotingPlugin::SetRemotingStatusText: %s"), *message);
 	}
 
 	void FHolographicRemotingPlugin::UpdateDisconnectedText()
