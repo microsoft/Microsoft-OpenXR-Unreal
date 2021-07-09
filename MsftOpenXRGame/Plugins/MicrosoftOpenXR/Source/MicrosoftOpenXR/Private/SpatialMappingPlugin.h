@@ -38,6 +38,8 @@
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#include "Misc/EngineVersionComparison.h"
+
 namespace MicrosoftOpenXR
 {
 	class WMRAnchorLocalizationData : public TSharedFromThis<WMRAnchorLocalizationData>

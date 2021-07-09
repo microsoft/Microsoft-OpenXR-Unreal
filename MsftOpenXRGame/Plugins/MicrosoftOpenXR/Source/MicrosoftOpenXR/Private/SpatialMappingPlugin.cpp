@@ -255,7 +255,12 @@ namespace MicrosoftOpenXR
 			}
 		}
 
-		auto MeshUpdate = new FOpenXRMeshUpdate;
+#if !UE_VERSION_OLDER_THAN(4, 27, 0)
+		auto MeshUpdate = MakeShared<FOpenXRMeshUpdate>();
+#else
+		auto MeshUpdate = new FOpenXRMeshUpdate();
+#endif
+
 		MeshUpdate->TrackingState = EARTrackingState::Tracking;
 
 		FTransform Transform;
