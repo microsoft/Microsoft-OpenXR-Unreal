@@ -73,6 +73,12 @@ namespace MicrosoftOpenXR
 			break;
 		case XR_TYPE_REMOTING_EVENT_DATA_DISCONNECTED_MSFT:
 			UpdateDisconnectedText();
+			
+			// Workaround for UEVR-2238
+			// When remoting disconnects the OpenXR session is destroyed.
+			// Currently DestroySession does not reset the VRFocus, which prevents input from working when remoting.
+			FApp::SetUseVRFocus(false);
+			FApp::SetHasVRFocus(false);
 			break;
 		}
 	}
