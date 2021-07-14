@@ -363,7 +363,14 @@ namespace MicrosoftOpenXR
 	bool FHolographicRemotingPlugin::ParseRemotingCmdArgs()
 	{
 #if WITH_EDITOR
-		ParseRemotingConfig();
+		// Only use the remoting settings config from VR PIE. Otherwise, if an AppRemotingPlayer is not running,
+		// OpenXRHMD will fire a RequestExit when the remoting runtime fails to connect.
+		// 
+		// A Standalone Game PIE should fall back to parsing the command line if remoting is desired.
+		if (!FApp::IsGame())
+		{
+			ParseRemotingConfig();
+		}
 #elif !SUPPORTS_REMOTING_IN_PACKAGED_BUILD
 		return false;
 #endif
