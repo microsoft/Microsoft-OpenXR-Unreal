@@ -20,6 +20,8 @@
 #include "OpenXRCore.h"
 #include "HeadMountedDisplayTypes.h"
 
+#include "Engine/World.h"
+
 #if WITH_EDITOR
 #include "Editor.h"
 #endif
