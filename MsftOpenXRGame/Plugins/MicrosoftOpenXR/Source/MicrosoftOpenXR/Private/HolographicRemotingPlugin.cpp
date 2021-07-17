@@ -73,6 +73,12 @@ namespace MicrosoftOpenXR
 			break;
 		case XR_TYPE_REMOTING_EVENT_DATA_DISCONNECTED_MSFT:
 			UpdateDisconnectedText();
+			
+			// Workaround for UEVR-2238
+			// When remoting disconnects the OpenXR session is destroyed.
+			// Currently DestroySession does not reset the VRFocus, which prevents input from working when remoting.
+			FApp::SetUseVRFocus(false);
+			FApp::SetHasVRFocus(false);
 			break;
 		}
 	}
@@ -254,14 +260,20 @@ namespace MicrosoftOpenXR
 
 	void FHolographicRemotingPlugin::SetRemotingStatusText(FString message, FLinearColor statusColor)
 	{
+		UE_LOG(LogHMD, Log, TEXT("HolographicRemotingPlugin::SetRemotingStatusText: %s"), *message);
+
+		// This function may be called before the world is initialized, which can cause the OpenXRRuntimeSettings to improperly initialize.
+		if (!GWorld)
+		{
+			return;
+		}
+
 #if WITH_EDITOR
 		if (UMicrosoftOpenXRRuntimeSettings::Get() != nullptr)
 		{
 			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingStatusChanged.ExecuteIfBound(message, statusColor);
 		}
 #endif
-
-		UE_LOG(LogHMD, Log, TEXT("HolographicRemotingPlugin::SetRemotingStatusText: %s"), *message);
 	}
 
 	void FHolographicRemotingPlugin::UpdateDisconnectedText()
@@ -357,7 +369,18 @@ namespace MicrosoftOpenXR
 	bool FHolographicRemotingPlugin::ParseRemotingCmdArgs()
 	{
 #if WITH_EDITOR
-		ParseRemotingConfig();
+		// Only use the remoting settings config from VR PIE. Otherwise, if an AppRemotingPlayer is not running,
+		// OpenXRHMD will fire a RequestExit when the remoting runtime fails to connect.
+		// 
+		// A Standalone Game PIE should fall back to parsing the command line if remoting is desired.
+#if !UE_VERSION_OLDER_THAN(4, 27, 0)
+		// 4.27 moved GetCustomLoader() later to the RHI initialization, after many engine globals have been initialized.
+		// 4.26 initialization is too early to use IsGame, and will prevent the editor from loading the remoting runtime.
+		if (!FApp::IsGame())
+#endif
+		{
+			ParseRemotingConfig();
+		}
 #elif !SUPPORTS_REMOTING_IN_PACKAGED_BUILD
 		return false;
 #endif

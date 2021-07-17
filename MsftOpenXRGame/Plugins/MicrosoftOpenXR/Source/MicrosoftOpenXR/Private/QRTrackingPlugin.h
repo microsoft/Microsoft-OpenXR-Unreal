@@ -25,6 +25,8 @@
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#include "Misc/EngineVersionComparison.h"
+
 class IOpenXRARTrackedGeometryHolder;
 struct FOpenXRQRCodeData;
 

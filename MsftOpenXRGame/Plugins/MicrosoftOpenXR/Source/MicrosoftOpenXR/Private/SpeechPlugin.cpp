@@ -274,7 +274,15 @@ namespace MicrosoftOpenXR
 			{
 				try
 				{
-					SpeechRecognizer.ContinuousRecognitionSession().StopAsync();
+					SpeechRecognizer.ContinuousRecognitionSession().StopAsync().Completed([this](
+						winrt::Windows::Foundation::IAsyncAction action, winrt::Windows::Foundation::AsyncStatus status)
+					{
+						// close the speech recognizer after the recognition session stops.
+						// Otherwise closing the speech recognizer can cause a hang.
+						this->SpeechRecognizer.Constraints().Clear();
+						this->SpeechRecognizer.Close();
+						this->SpeechRecognizer = nullptr;
+					});
 				}
 				catch (winrt::hresult_error e)
 				{
@@ -282,10 +290,12 @@ namespace MicrosoftOpenXR
 					UE_LOG(LogHMD, Warning, TEXT("ContinuousRecognitionSession failed to stop with error: %d"), e.code().value);
 				}
 			}
-
-			SpeechRecognizer.Constraints().Clear();
-			SpeechRecognizer.Close();
-			SpeechRecognizer = nullptr;
+			else
+			{
+				SpeechRecognizer.Constraints().Clear();
+				SpeechRecognizer.Close();
+				SpeechRecognizer = nullptr;
+			}
 		}
 	}
 }	 // namespace MicrosoftOpenXR
