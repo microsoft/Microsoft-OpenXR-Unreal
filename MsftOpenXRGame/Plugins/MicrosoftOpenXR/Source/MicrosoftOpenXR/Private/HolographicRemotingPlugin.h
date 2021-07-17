@@ -28,6 +28,8 @@
 
 #include "MicrosoftOpenXRRuntimeSettings.h"
 
+#include "Misc/EngineVersionComparison.h"
+
 // Microsoft.Holographic.AppRemoting binaries only exist for Win64.
 #define SUPPORTS_REMOTING_IN_PACKAGED_BUILD (!WITH_EDITOR && PLATFORM_DESKTOP && PLATFORM_64BITS)
 
