@@ -51,17 +51,6 @@ public:
 	{
 		check(IsInRenderingThread());
 
-		FString RHIString = FApp::GetGraphicsRHI();
-		if (RHIString.IsEmpty())
-		{
-			return;
-		}
-
-		if (RHIString != TEXT("DirectX 11"))
-		{
-			return;
-		}
-
 		FSamplerStateInitializerRHI SamplerStateInitializer(SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp);
 		SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializer);
 
@@ -267,6 +256,11 @@ UOpenXRCameraImageTexture::UOpenXRCameraImageTexture(const FObjectInitializer& O
 	: Super(ObjectInitializer)
 	, LastUpdateFrame(0)
 {
+	FString RHIString = FApp::GetGraphicsRHI();
+	if (!RHIString.IsEmpty())
+	{
+		IsDX11 = RHIString == TEXT("DirectX 11");
+	}
 }
 
 void UOpenXRCameraImageTexture::BeginDestroy()
@@ -276,6 +270,11 @@ void UOpenXRCameraImageTexture::BeginDestroy()
 
 FTextureResource* UOpenXRCameraImageTexture::CreateResource()
 {
+	if (!IsDX11)
+	{
+		return nullptr;
+	}
+
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	return new FOpenXRCameraImageResource(this);
 #else

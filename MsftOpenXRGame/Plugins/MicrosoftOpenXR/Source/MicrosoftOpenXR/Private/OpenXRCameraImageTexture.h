@@ -38,5 +38,7 @@ public:
 private:
 	/** Used to prevent two updates of the texture in the same game frame */
 	uint64 LastUpdateFrame;
+
+	bool IsDX11 = false;
 };
 
