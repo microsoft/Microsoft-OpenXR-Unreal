@@ -10,6 +10,9 @@
 
 #include "MicrosoftOpenXR.generated.h"
 
+// Currently remoting only supports x64 Windows: Editor and Packaged Exe
+#define SUPPORTS_REMOTING (PLATFORM_WINDOWS && PLATFORM_64BITS)
+
 USTRUCT(BlueprintType, Category = "MicrosoftOpenXR|OpenXR")
 struct FKeywordInput
 {

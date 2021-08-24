@@ -6,6 +6,7 @@
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #include "OpenXRCommon.h"
+#include "OpenXRCore.h"
 #include "MicrosoftOpenXR.h"
 #include "HeadMountedDisplayTypes.h"
 
@@ -30,6 +31,11 @@
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#if SUPPORTS_REMOTING
+#include "openxr_msft_holographic_remoting.h "
+#include "openxr_msft_remoting_speech.h"
+#endif
+
 namespace MicrosoftOpenXR
 {
 	class FSpeechPlugin : public IOpenXRExtensionPlugin
@@ -38,8 +44,11 @@ namespace MicrosoftOpenXR
 		void Register();
 		void Unregister();
 
-		void OnStartARSession(class UARSessionConfig* SessionConfig) override;
-		void OnStopARSession() override;
+		bool GetOptionalExtensions(TArray<const ANSICHAR*>& OutExtensions) override;
+		const void* OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext) override;
+		const void* OnBeginSession(XrSession InSession, const void* InNext) override;
+		void OnEvent(XrSession InSession, const XrEventDataBaseHeader* InHeader) override;
+		void OnEndPlay();
 
 		void AddKeywords(TArray<FKeywordInput> KeywordsToAdd);
 		void RemoveKeywords(TArray<FString> KeywordsToRemove);
@@ -58,6 +67,17 @@ namespace MicrosoftOpenXR
 		void CallSpeechCallback(FKey InKey);
 		void StartSpeechRecognizer();
 		void StopSpeechRecognizer();
+
+		XrSession Session;
+
+		// Remoting
+#if SUPPORTS_REMOTING
+		PFN_xrInitializeRemotingSpeechMSFT xrInitializeRemotingSpeechMSFT;
+		PFN_xrRetrieveRemotingSpeechRecognizedTextMSFT xrRetrieveRemotingSpeechRecognizedTextMSFT;
+#endif
+		bool bIsRemotingSpeechExtensionEnabled = false;
+
+		void RegisterSpeechCommandsWithRemoting();
 	};
 }	 // namespace MicrosoftOpenXR
 
