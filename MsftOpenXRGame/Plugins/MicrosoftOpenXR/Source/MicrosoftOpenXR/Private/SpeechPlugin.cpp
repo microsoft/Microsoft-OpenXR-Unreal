@@ -1,11 +1,16 @@
 // Copyright (c) 2020 Microsoft Corporation.
 // Licensed under the MIT License.
 
+// Known bug with speech over remoting as of the 2.6.2 remoting NuGet package:
+// Adding and removing keywords at runtime is not currently supported.  
+// All keywords the app uses when remoting must be declared in the input system.
+
 #include "SpeechPlugin.h"
 
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #include "Engine\Engine.h"
+#include "GameDelegates.h"
 
 using namespace winrt::Windows::Media::SpeechRecognition;
 
@@ -14,15 +19,55 @@ namespace MicrosoftOpenXR
 	void FSpeechPlugin::Register()
 	{
 		IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+		FGameDelegates::Get().GetEndPlayMapDelegate().AddRaw(this, &FSpeechPlugin::OnEndPlay);
 	}
 
 	void FSpeechPlugin::Unregister()
 	{
+		FGameDelegates::Get().GetEndPlayMapDelegate().RemoveAll(this);
 		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
 	}
 
-	void FSpeechPlugin::OnStartARSession(class UARSessionConfig* SessionConfig)
+	void FSpeechPlugin::OnEndPlay()
 	{
+		//remove keys from "speech" namespace
+		EKeys::RemoveKeysWithCategory(FInputActionSpeechMapping::GetKeyCategory());
+
+		StopSpeechRecognizer();
+
+		Keywords.clear();
+		KeywordMap.Empty();
+	}
+
+	bool FSpeechPlugin::GetOptionalExtensions(TArray<const ANSICHAR*>& OutExtensions)
+	{
+#if SUPPORTS_REMOTING
+		OutExtensions.Add(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+#endif
+		return true;
+	}
+
+	const void* FSpeechPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext)
+	{
+#if SUPPORTS_REMOTING
+		bIsRemotingSpeechExtensionEnabled =
+			IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+
+		if (bIsRemotingSpeechExtensionEnabled)
+		{
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrInitializeRemotingSpeechMSFT", (PFN_xrVoidFunction*)&xrInitializeRemotingSpeechMSFT));
+			XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrRetrieveRemotingSpeechRecognizedTextMSFT", (PFN_xrVoidFunction*)&xrRetrieveRemotingSpeechRecognizedTextMSFT));
+		}
+#endif
+
+		return InNext;
+	}
+
+	const void* FSpeechPlugin::OnBeginSession(XrSession InSession, const void* InNext)
+	{
+		Session = InSession;
+
 		// Add all speech keywords from the input system
 		const TArray <FInputActionSpeechMapping>& SpeechMappings = GetDefault<UInputSettings>()->GetSpeechMappings();
 		for (const FInputActionSpeechMapping& SpeechMapping : SpeechMappings)
@@ -37,20 +82,54 @@ namespace MicrosoftOpenXR
 		{
 			StartSpeechRecognizer();
 		}
+
+		return InNext;
 	}
 
-	void FSpeechPlugin::OnStopARSession()
+	void FSpeechPlugin::OnEvent(XrSession InSession, const XrEventDataBaseHeader* InHeader)
 	{
-		//remove keys from "speech" namespace
-		EKeys::RemoveKeysWithCategory(FInputActionSpeechMapping::GetKeyCategory());
+#if SUPPORTS_REMOTING
+		switch ((XrRemotingSpeechStructureType)InHeader->type)
+		{
+		case XR_TYPE_EVENT_DATA_REMOTING_SPEECH_RECOGNIZED_MSFT:
+		{
+			auto speechEventData = reinterpret_cast<const XrEventDataRemotingSpeechRecognizedMSFT*>(InHeader);
+			std::string text;
+			uint32_t dataBytesCount = 0;
 
-		StopSpeechRecognizer();
+			XR_ENSURE_MSFT(xrRetrieveRemotingSpeechRecognizedTextMSFT(InSession, speechEventData->packetId, 0, &dataBytesCount, nullptr));
+			text.resize(dataBytesCount);
+			XR_ENSURE_MSFT(xrRetrieveRemotingSpeechRecognizedTextMSFT(InSession, speechEventData->packetId, text.size(), &dataBytesCount, text.data()));
 
-		KeywordMap.Empty();
+			CallSpeechCallback(KeywordMap.FindRef(FString(text.c_str())));
+			break;
+		}
+		case XR_TYPE_EVENT_DATA_REMOTING_SPEECH_RECOGNIZER_STATE_CHANGED_MSFT:
+			auto recognizerStateEventData = reinterpret_cast<const XrEventDataRemotingSpeechRecognizerStateChangedMSFT*>(InHeader);
+			auto state = recognizerStateEventData->speechRecognizerState;
+
+			if (state == XR_REMOTING_SPEECH_RECOGNIZER_STATE_INITIALIZATION_FAILED_MSFT)
+			{
+				UE_LOG(LogHMD, Warning, TEXT("Remoting speech recognizer initialization failed."));
+				if (strlen(recognizerStateEventData->stateMessage) > 0)
+				{
+					UE_LOG(LogHMD, Warning, TEXT("Speech recognizer initialization error: %s"), recognizerStateEventData->stateMessage);
+				}
+			}
+
+			break;
+		}
+#endif
 	}
 
 	void FSpeechPlugin::AddKeywords(TArray<FKeywordInput> KeywordsToAdd)
 	{
+		if (bIsRemotingSpeechExtensionEnabled)
+		{
+			UE_LOG(LogHMD, Warning, TEXT("Remoting speech does not currently support adding keywords at runtime."));
+			return;
+		}
+
 		APlayerController* PlayerController = nullptr;
 		UInputSettings* InputSettings = nullptr;
 		UInputComponent* InputComponent = nullptr;
@@ -103,6 +182,12 @@ namespace MicrosoftOpenXR
 
 	void FSpeechPlugin::RemoveKeywords(TArray<FString> KeywordsToRemove)
 	{
+		if (bIsRemotingSpeechExtensionEnabled)
+		{
+			UE_LOG(LogHMD, Warning, TEXT("Remoting speech does not currently support removing keywords at runtime."));
+			return;
+		}
+
 		if (KeywordsToRemove.Num() == 0)
 		{
 			UE_LOG(LogHMD, Warning, TEXT("FSpeechPlugin::RemoveKeywords failed: No keywords to remove."));
@@ -198,8 +283,69 @@ namespace MicrosoftOpenXR
 		});
 	}
 
+	void FSpeechPlugin::RegisterSpeechCommandsWithRemoting()
+	{
+		if (!bIsRemotingSpeechExtensionEnabled)
+		{
+			// Only use the remoting OpenXR extension when remoting.
+			return;
+		}
+
+#if SUPPORTS_REMOTING
+		const TArray <FInputActionSpeechMapping>& SpeechMappings = GetDefault<UInputSettings>()->GetSpeechMappings();
+
+		XrRemotingSpeechInitInfoMSFT remotingSpeechInfo{ (XrStructureType)XR_TYPE_REMOTING_SPEECH_INIT_INFO_MSFT };
+
+		// A language string is required for remoting speech to work.
+		// Default to "en-US", but allow for additional languages in the game config.
+		FString RemotingSpeechLanguage = "en-US";
+		GConfig->GetString(TEXT("/Script/MicrosoftOpenXRRemotingSettings"), TEXT("SpeechLanguage"),
+			RemotingSpeechLanguage, GGameIni);
+		if (RemotingSpeechLanguage.TrimStartAndEnd().IsEmpty())
+		{
+			// A SpeechLanguage entry exists, but is empty.  Default back to "en-US"
+			RemotingSpeechLanguage = "en-US";
+		}
+
+		UE_LOG(LogHMD, Log, TEXT("Remoting initializing with language: %s."), *RemotingSpeechLanguage);
+
+		strcpy_s(remotingSpeechInfo.language, TCHAR_TO_UTF8(*RemotingSpeechLanguage));
+
+		std::vector<const char*> keywords;
+		for (const FInputActionSpeechMapping& SpeechMapping : SpeechMappings)
+		{
+			FString key = SpeechMapping.GetSpeechKeyword().ToString();
+			int keywordLength = key.Len() + 1;
+			char* keyword = new char[keywordLength];
+			strcpy_s(keyword, keywordLength * sizeof(char), (const char*)TCHAR_TO_UTF8(*key));
+
+			keywords.push_back(keyword);
+		}
+
+		remotingSpeechInfo.dictionaryEntries = keywords.data();
+		remotingSpeechInfo.dictionaryEntriesCount = keywords.size();
+
+		XrResult initializationResult = xrInitializeRemotingSpeechMSFT(Session, &remotingSpeechInfo);
+		if (XR_FAILED(initializationResult))
+		{
+			UE_LOG(LogHMD, Warning, TEXT("Remoting speech failed to initialize with XrResult: %d."), initializationResult);
+		}
+
+		for (const char* keyword : keywords)
+		{
+			delete[] keyword;
+		}
+#endif
+	}
+
 	void FSpeechPlugin::StartSpeechRecognizer()
 	{
+		if (bIsRemotingSpeechExtensionEnabled)
+		{
+			RegisterSpeechCommandsWithRemoting();
+			return;
+		}
+
 		SpeechRecognitionListConstraint constraint = SpeechRecognitionListConstraint(Keywords);
 		SpeechRecognizer = winrt::Windows::Media::SpeechRecognition::SpeechRecognizer();
 		SpeechRecognizer.Constraints().Clear();
@@ -253,6 +399,12 @@ namespace MicrosoftOpenXR
 
 	void FSpeechPlugin::StopSpeechRecognizer()
 	{
+		if (bIsRemotingSpeechExtensionEnabled)
+		{
+			// Remoting does not use the winrt SpeechRecognizer
+			return;
+		}
+
 		if (CompileConstraintsAsyncOperation && CompileConstraintsAsyncOperation.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
 		{
 			CompileConstraintsAsyncOperation.Cancel();

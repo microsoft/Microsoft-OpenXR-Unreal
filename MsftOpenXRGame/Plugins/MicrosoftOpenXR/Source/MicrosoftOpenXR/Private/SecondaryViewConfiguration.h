@@ -35,8 +35,8 @@ namespace MicrosoftOpenXR
 
 		private:
 			const XrViewConfigurationType ViewConfigType;
-			const XrSpace Space;
 			const XrEnvironmentBlendMode EnvBlendMode;
+			const XrSpace Space;
 			const TArray<XrCompositionLayerProjectionView> Views;
 
 			// The following are set up at

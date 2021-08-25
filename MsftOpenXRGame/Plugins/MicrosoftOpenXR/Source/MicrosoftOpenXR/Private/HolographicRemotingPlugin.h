@@ -3,8 +3,7 @@
 
 #pragma once
 
-// Currently remoting only supports x64 Windows: Editor and Packaged Exe
-#define SUPPORTS_REMOTING (PLATFORM_WINDOWS && PLATFORM_64BITS)
+#include "MicrosoftOpenXR.h"
 
 #if SUPPORTS_REMOTING
 

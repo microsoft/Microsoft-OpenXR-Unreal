@@ -20,16 +20,16 @@
 #include "Windows/HideWindowsPlatformTypes.h"
 
 #include <mutex>
-#define HL_ANCHOR_STORE_AVAILABLE 1
+#define WINRT_ANCHOR_STORE_AVAILABLE 1
 #else
-#define HL_ANCHOR_STORE_AVAILABLE 0
+#define WINRT_ANCHOR_STORE_AVAILABLE 0
 #endif
 
 namespace MicrosoftOpenXR
 {
 	struct SAnchorMSFT
 	{
-		XrSpatialAnchorMSFT AnchorId;
+		XrSpatialAnchorMSFT Anchor;
 		XrSpace Space;
 	};
 
@@ -56,6 +56,7 @@ namespace MicrosoftOpenXR
 
 		virtual bool IsLocalPinSaveSupported() const override;
 
+		bool IsAnchorStoreReady();
 		virtual bool ArePinsReadyToLoad() override;
 
 		virtual void LoadARPins(XrSession InSession, TFunction<UARPin*(FName)> OnCreatePin) override;
@@ -76,9 +77,10 @@ namespace MicrosoftOpenXR
 		PFN_xrDestroySpatialAnchorMSFT xrDestroySpatialAnchorMSFT;
 		PFN_xrCreateSpatialAnchorSpaceMSFT xrCreateSpatialAnchorSpaceMSFT;
 
-		bool bIsLocalAnchorStoreSupported = false;
+		bool bIsAnchorPersistenceExtensionSupported = false;
+		bool bIsPerceptionAnchorInteropExtensionSupported = false;
 
-#if HL_ANCHOR_STORE_AVAILABLE
+#if WINRT_ANCHOR_STORE_AVAILABLE
 		PFN_xrCreateSpatialAnchorFromPerceptionAnchorMSFT xrCreateSpatialAnchorFromPerceptionAnchorMSFT;
 		PFN_xrTryGetPerceptionAnchorFromSpatialAnchorMSFT xrTryGetPerceptionAnchorFromSpatialAnchorMSFT;
 
@@ -87,5 +89,14 @@ namespace MicrosoftOpenXR
 		winrt::Windows::Perception::Spatial::SpatialAnchorStore	m_spatialAnchorStore{ nullptr };
 #endif
 
+		PFN_xrCreateSpatialAnchorStoreConnectionMSFT xrCreateSpatialAnchorStoreConnectionMSFT;
+		PFN_xrDestroySpatialAnchorStoreConnectionMSFT xrDestroySpatialAnchorStoreConnectionMSFT;
+		PFN_xrPersistSpatialAnchorMSFT xrPersistSpatialAnchorMSFT;
+		PFN_xrEnumeratePersistedSpatialAnchorNamesMSFT xrEnumeratePersistedSpatialAnchorNamesMSFT;
+		PFN_xrCreateSpatialAnchorFromPersistedNameMSFT xrCreateSpatialAnchorFromPersistedNameMSFT;
+		PFN_xrUnpersistSpatialAnchorMSFT xrUnpersistSpatialAnchorMSFT;
+		PFN_xrClearSpatialAnchorStoreMSFT xrClearSpatialAnchorStoreMSFT;
+
+		XrSpatialAnchorStoreConnectionMSFT SpatialAnchorStoreMSFT = XR_NULL_HANDLE;
 	};
 }	 // namespace MicrosoftOpenXR
