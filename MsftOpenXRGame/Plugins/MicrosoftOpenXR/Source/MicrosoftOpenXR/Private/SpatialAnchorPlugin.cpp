@@ -360,7 +360,9 @@ namespace MicrosoftOpenXR
 			SAnchorMSFT* AnchorMSFT = reinterpret_cast<SAnchorMSFT*>(nativeResource);
 
 			XrSpatialAnchorPersistenceInfoMSFT PersistenceInfo{ XR_TYPE_SPATIAL_ANCHOR_PERSISTENCE_INFO_MSFT };
-			strncpy_s(PersistenceInfo.spatialAnchorPersistenceName.name, TCHAR_TO_UTF8(*SaveId), SaveId.Len());
+
+			FTCHARToUTF8 UTF8ConvertedString(*SaveId);
+			memcpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
 			PersistenceInfo.spatialAnchor = AnchorMSFT->Anchor;
 
 			XrResult result = xrPersistSpatialAnchorMSFT(SpatialAnchorStoreMSFT, &PersistenceInfo);
@@ -402,7 +404,9 @@ namespace MicrosoftOpenXR
 		{
 			const FString SaveId = InName.ToString().ToLower();
 			XrSpatialAnchorPersistenceNameMSFT SpatialAnchorPersistenceName;
-			strncpy_s(SpatialAnchorPersistenceName.name, TCHAR_TO_ANSI(*SaveId), SaveId.Len());
+
+			FTCHARToUTF8 UTF8ConvertedString(*SaveId);
+			memcpy(SpatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
 
 			xrUnpersistSpatialAnchorMSFT(SpatialAnchorStoreMSFT, &SpatialAnchorPersistenceName);
 			return;
@@ -464,6 +468,32 @@ namespace MicrosoftOpenXR
 	bool FSpatialAnchorPlugin::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
 	{
 #if WINRT_ANCHOR_STORE_AVAILABLE 
+		if (!IsAnchorStoreReady())
+		{
+			return false;
+		}
+
+		if (bIsAnchorPersistenceExtensionSupported)
+		{
+			XrSpatialAnchorMSFT Anchor = {};
+			if (XR_FAILED(xrCreateSpatialAnchorFromPerceptionAnchorMSFT(Session, InPerceptionAnchor, &Anchor)))
+			{
+				return false;
+			}
+
+			SAnchorMSFT* AnchorMSFT = new SAnchorMSFT;
+			AnchorMSFT->Anchor = Anchor;
+
+			XrSpatialAnchorPersistenceInfoMSFT PersistenceInfo{ XR_TYPE_SPATIAL_ANCHOR_PERSISTENCE_INFO_MSFT };
+
+			FTCHARToUTF8 UTF8ConvertedString(*InPinId.ToLower());
+			memcpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
+
+			PersistenceInfo.spatialAnchor = AnchorMSFT->Anchor;
+
+			return XR_SUCCEEDED(xrPersistSpatialAnchorMSFT(SpatialAnchorStoreMSFT, &PersistenceInfo));
+		}
+
 		std::lock_guard<std::mutex> lock(m_spatialAnchorStoreLock);
 		if (m_spatialAnchorStore == nullptr) 
 		{ 
