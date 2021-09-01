@@ -1226,6 +1226,9 @@ bool FAzureSpatialAnchorsForOpenXR::CreateARPinAroundAzureCloudSpatialAnchor(con
 	}
 
 	// First store the perception anchor in the anchor store.
+	// If a conflicting local anchor exists, remove it first.
+	UARBlueprintLibrary::RemoveARPinFromLocalStore(FName(InPinId.ToLower()));
+
 	if (!UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(InPinId.ToLower(), *(::IUnknown**)&localAnchor))
 	{
 		UE_LOG(LogHMD, Warning, TEXT("FAzureSpatialAnchorsForOpenXR::CreateARPinAroundAzureCloudSpatialAnchor failed to store anchor in local store."));
@@ -1241,12 +1244,20 @@ bool FAzureSpatialAnchorsForOpenXR::CreateARPinAroundAzureCloudSpatialAnchor(con
 			OutARPin = Pin.Value;
 
 			InAzureCloudSpatialAnchor->ARPin = OutARPin;
-			return OutARPin != nullptr;
+			break;
 		}
 	}
 
-	UE_LOG(LogHMD, Warning, TEXT("FAzureSpatialAnchorsForOpenXR::CreateARPinAroundAzureCloudSpatialAnchor failed to find anchor in local store."));
-	return false;
+	// Since this is a dummy ARPin, stop persisting it so future app launches don't load unnecessary pins.
+	UARBlueprintLibrary::RemoveARPinFromLocalStore(FName(InPinId.ToLower()));
+
+	if (OutARPin == nullptr)
+	{
+		UE_LOG(LogHMD, Warning, TEXT("FAzureSpatialAnchorsForOpenXR::CreateARPinAroundAzureCloudSpatialAnchor failed to find anchor in local store."));
+		return false;
+	}
+
+	return true;
 }
 
 IMPLEMENT_MODULE(FAzureSpatialAnchorsForOpenXR, AzureSpatialAnchorsForOpenXR)
