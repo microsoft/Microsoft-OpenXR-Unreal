@@ -444,9 +444,16 @@ namespace MicrosoftOpenXR
 			}
 			else
 			{
-				SpeechRecognizer.Constraints().Clear();
-				SpeechRecognizer.Close();
-				SpeechRecognizer = nullptr;
+				try
+				{
+					SpeechRecognizer.Constraints().Clear();
+					SpeechRecognizer.Close();
+					SpeechRecognizer = nullptr;
+				}
+				catch (winrt::hresult_error e)
+				{
+					UE_LOG(LogHMD, Warning, TEXT("SpeechRecognizer failed to close with error: %d"), e.code().value);
+				}
 			}
 		}
 	}
