@@ -295,6 +295,10 @@ namespace MicrosoftOpenXR
 	{
 		if (On)
 		{
+#if !UE_VERSION_OLDER_THAN(4, 27, 1)
+			UE_LOG(LogHMD, Warning,
+				TEXT("Spatial Mapping is deprecated in 4.27.1, please update your code to use Scene Understanding."));
+#endif	  // #if !UE_VERSION_OLDER_THAN(4, 27, 1)
 			if (!SpatialSurfaceObserver::IsSupported())
 			{
 				UE_LOG(LogHMD, Warning, TEXT("SpatialSurfaceObserver is not supported on this platform, not attempting to toggle spatial mapping."));
