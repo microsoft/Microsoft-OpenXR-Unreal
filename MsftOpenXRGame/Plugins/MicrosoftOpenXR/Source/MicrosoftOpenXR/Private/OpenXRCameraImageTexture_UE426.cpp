@@ -269,6 +269,11 @@ UOpenXRCameraImageTexture::UOpenXRCameraImageTexture(const FObjectInitializer& O
 	: Super(ObjectInitializer)
 	, LastUpdateFrame(0)
 {
+	FString RHIString = FApp::GetGraphicsRHI();
+	if (!RHIString.IsEmpty())
+	{
+		IsDX11 = RHIString == TEXT("DirectX 11");
+	}
 }
 
 void UOpenXRCameraImageTexture::BeginDestroy()
@@ -278,6 +283,12 @@ void UOpenXRCameraImageTexture::BeginDestroy()
 
 FTextureResource* UOpenXRCameraImageTexture::CreateResource()
 {
+	// 4.26 does not support DX12, do not attempt to create a resource if we are a DX12 app.
+	if (!IsDX11)
+	{
+		return nullptr;
+	}
+	
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	return new FOpenXRCameraImageResource(this);
 #else
