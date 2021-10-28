@@ -4,36 +4,23 @@
 #pragma once
 
 #include "OpenXRCommon.h"
-#include "Templates/PimplPtr.h"
-
-class IOpenXRARTrackedMeshHolder;
+#include "SceneUnderstandingBase.h"
 
 namespace MicrosoftOpenXR
 {
-	class FSceneUnderstandingPlugin : public IOpenXRExtensionPlugin, public IOpenXRCustomCaptureSupport
+	class FSceneUnderstandingPlugin : public FSceneUnderstandingBase
 	{
 	public:
 		FSceneUnderstandingPlugin();
-		void Register();
-		void Unregister();
 
 		bool GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions) override;
-
-		const void* OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext) override;
-		const void* OnBeginSession(XrSession InSession, const void* InNext) override;
-
-		void UpdateDeviceLocations(XrSession InSession, XrTime DisplayTime, XrSpace TrackingSpace) override;
 
 		IOpenXRCustomCaptureSupport* GetCustomCaptureSupport(const EARCaptureType CaptureType) override;
 
 		bool OnToggleARCapture(const bool bOnOff) override;
-		void OnStartARSession(class UARSessionConfig* SessionConfig) override;
 
-		TArray<FARTraceResult> OnLineTraceTrackedObjects(const TSharedPtr<FARSupportInterface, ESPMode::ThreadSafe> ARCompositionComponent, const FVector Start, const FVector End, const EARLineTraceChannels TraceChannels) override;
-
-	private:
-
-		class FImpl;
-		TPimplPtr<FImpl> Impl;
+	protected:
+		XrSceneComputeConsistencyMSFT GetSceneComputeConsistency() override;
+		TArray<XrSceneComputeFeatureMSFT> GetSceneComputeFeatures(class UARSessionConfig* SessionConfig) override;
 	};
 }	 // namespace MicrosoftOpenXR

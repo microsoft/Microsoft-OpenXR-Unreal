@@ -198,6 +198,27 @@ bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPin
 #endif
 }
 
+bool UMicrosoftOpenXRFunctionLibrary::IsRemoting()
+{
+#if SUPPORTS_REMOTING
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->HolographicRemotingPlugin->IsRemoting();
+#endif
+
+	return false;
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::CanDetectPlanes()
+{
+#if UE_VERSION_OLDER_THAN(4, 27, 1)
+	// SU was introduced in 4.27.1
+	return false;
+#elif PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SceneUnderstandingPlugin.CanDetectPlanes();
+#endif
+
+	return false;
+}
+
 #undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(MicrosoftOpenXR::FMicrosoftOpenXRModule, MicrosoftOpenXR)

@@ -151,6 +151,33 @@ namespace MicrosoftOpenXR
 		return Map;
 	}
 
+	inline void GetSceneVisibleMeshes(XrSceneMSFT SceneHandle, const ExtensionDispatchTable& Ext,
+		const TArray<XrScenePlaneAlignmentTypeMSFT>& PlaneAlignmentFilters, TArray<XrSceneComponentMSFT>& Components,
+		TArray<XrSceneMeshMSFT>& Meshes)
+	{
+		XrSceneComponentsGetInfoMSFT GetInfo{ XR_TYPE_SCENE_COMPONENTS_GET_INFO_MSFT };
+		GetInfo.componentType = XR_SCENE_COMPONENT_TYPE_VISUAL_MESH_MSFT;
+		XrScenePlaneAlignmentFilterInfoMSFT AlignmentFilter{ XR_TYPE_SCENE_PLANE_ALIGNMENT_FILTER_INFO_MSFT };
+		if (PlaneAlignmentFilters.Num() > 0)
+		{
+			AlignmentFilter.alignmentCount = static_cast<uint32_t>(PlaneAlignmentFilters.Num());
+			AlignmentFilter.alignments = PlaneAlignmentFilters.GetData();
+			InsertExtensionStruct(GetInfo, AlignmentFilter);
+		}
+		XrSceneComponentsMSFT SceneComponents{ XR_TYPE_SCENE_COMPONENTS_MSFT };
+		XR_ENSURE(Ext.xrGetSceneComponentsMSFT(SceneHandle, &GetInfo, &SceneComponents));
+		const uint32_t Count = SceneComponents.componentCountOutput;
+		Components.SetNum(Count);
+		SceneComponents.componentCapacityInput = Count;
+		SceneComponents.components = Components.GetData();
+		Meshes.SetNum(Count);
+		XrSceneMeshesMSFT SceneMeshes{ XR_TYPE_SCENE_MESHES_MSFT };
+		SceneMeshes.sceneMeshCount = Count;
+		SceneMeshes.sceneMeshes = Meshes.GetData();
+		InsertExtensionStruct(SceneComponents, SceneMeshes);
+		XR_ENSURE(Ext.xrGetSceneComponentsMSFT(SceneHandle, &GetInfo, &SceneComponents));
+	}
+
 	inline void GetScenePlanes(XrSceneMSFT SceneHandle, const ExtensionDispatchTable& Ext,
 		const TArray<XrScenePlaneAlignmentTypeMSFT>& PlaneAlignmentFilters, TArray<XrSceneComponentMSFT>& Components,
 		TArray<XrScenePlaneMSFT>& Planes)

@@ -46,6 +46,11 @@ namespace MicrosoftOpenXR
 		void PostGetSystem(XrInstance InInstance, XrSystemId InSystem) override;
 		const void* OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext) override;
 
+		bool IsRemoting()
+		{
+			return remotingEnabled;
+		}
+
 	private:
 		void* LoaderHandle;
 		bool remotingEnabled = false;
