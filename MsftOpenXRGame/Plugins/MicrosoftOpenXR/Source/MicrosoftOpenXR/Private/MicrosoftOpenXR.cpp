@@ -169,7 +169,7 @@ void UMicrosoftOpenXRFunctionLibrary::RemoveKeywords(TArray<FString> Keywords)
 #endif
 }
 
-bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, ::IUnknown** OutPerceptionAnchor)
+bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, void** OutPerceptionAnchor)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
@@ -178,13 +178,13 @@ bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* 
 	}
 
 	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.GetPerceptionAnchorFromOpenXRAnchor(
-		(XrSpatialAnchorMSFT) AnchorID, OutPerceptionAnchor);
+		(XrSpatialAnchorMSFT) AnchorID, (::IUnknown**)OutPerceptionAnchor);
 #else
 	return false;
 #endif
 }
 
-bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
+bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, void* InPerceptionAnchor)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
@@ -192,7 +192,7 @@ bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPin
 		return false;
 	}
 
-	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, InPerceptionAnchor);
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, (::IUnknown*)InPerceptionAnchor);
 #else
 	return false;
 #endif

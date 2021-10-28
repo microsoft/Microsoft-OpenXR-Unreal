@@ -102,7 +102,7 @@ public:
 	static void RemoveKeywords(TArray<FString> Keywords);
 
 	// Helper function to use OpenXR functions from the AzureSpatialAnchors module.
-	static bool GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, ::IUnknown** OutPerceptionAnchor);
-	static bool StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor);
+	static bool GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, void** OutPerceptionAnchor);
+	static bool StorePerceptionAnchor(const FString& InPinId, void* InPerceptionAnchor);
 };
 
