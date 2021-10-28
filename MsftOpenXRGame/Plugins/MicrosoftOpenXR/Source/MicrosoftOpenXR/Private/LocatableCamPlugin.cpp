@@ -534,7 +534,13 @@ namespace MicrosoftOpenXR
 	}
 
 	bool FLocatableCamPlugin::OnToggleARCapture(const bool bOnOff) 
-	{ 
+	{
+		if (UMicrosoftOpenXRFunctionLibrary::IsRemoting())
+		{
+			UE_LOG(LogHMD, Warning, TEXT("Camera ARCapture is not supported over remoting."));
+			return false;
+		}
+
 		if (bOnOff)
 		{
 			StartCameraCapture(Format.Width, Format.Height, Format.FPS);
