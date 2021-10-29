@@ -18,12 +18,15 @@
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 #include "Windows/AllowWindowsPlatformTypes.h"
 
+#pragma warning(push)
+#pragma warning(disable:4005) // macro redefinition
 THIRD_PARTY_INCLUDES_START
 #include <windows.h>
 #include <D3D11.h>
 #include <d3d11_1.h>
 #include <dxgi1_2.h>
 THIRD_PARTY_INCLUDES_END
+#pragma warning(pop)
 
 #include "Windows/COMPointer.h"
 #include "Windows/HideWindowsPlatformTypes.h"
