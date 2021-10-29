@@ -15,9 +15,9 @@ namespace MicrosoftOpenXR
 	class TrackedGeometryCollision
 	{
 	public:
-		TrackedGeometryCollision(const TArray<FVector> InVertices, const TArray<MRMESH_INDEX_TYPE> InIndices);
-		
-		void UpdateVertices(const TArray<FVector> InVertices, const TArray<MRMESH_INDEX_TYPE> InIndices);
+		TrackedGeometryCollision(TArray<FVector> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices);
+
+		void UpdateVertices(const TArray<FVector>& InVertices, const TArray<MRMESH_INDEX_TYPE>& InIndices);
 
 		/// <summary>
 		/// Hit test a ray against tracked mesh data.

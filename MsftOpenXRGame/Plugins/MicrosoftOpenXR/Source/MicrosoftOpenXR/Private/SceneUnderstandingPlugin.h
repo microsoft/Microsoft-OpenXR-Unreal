@@ -8,12 +8,16 @@
 
 namespace MicrosoftOpenXR
 {
-	class FSpatialMappingPlugin : public FSceneUnderstandingBase
+	class FSceneUnderstandingPlugin : public FSceneUnderstandingBase
 	{
 	public:
-		FSpatialMappingPlugin();
+		FSceneUnderstandingPlugin();
+
+		bool GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions) override;
 
 		IOpenXRCustomCaptureSupport* GetCustomCaptureSupport(const EARCaptureType CaptureType) override;
+
+		bool OnToggleARCapture(const bool bOnOff) override;
 
 	protected:
 		XrSceneComputeConsistencyMSFT GetSceneComputeConsistency() override;

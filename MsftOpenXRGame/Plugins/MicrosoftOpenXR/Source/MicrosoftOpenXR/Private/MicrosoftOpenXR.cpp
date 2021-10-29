@@ -4,18 +4,19 @@
 #include "MicrosoftOpenXR.h"
 
 #include "CoreMinimal.h"
-#include "HolographicWindowAttachmentPlugin.h"
-#include "HolographicRemotingPlugin.h"
-#include "SpatialAnchorPlugin.h"
-#include "Modules/ModuleManager.h"
 #include "HandMeshPlugin.h"
-#include "QRTrackingPlugin.h"
-#include "LocatableCamPlugin.h"
+#include "HolographicRemotingPlugin.h"
+#include "HolographicWindowAttachmentPlugin.h"
 #include "Interfaces/IPluginManager.h"
-#include "ShaderCore.h"
-#include "SpeechPlugin.h"
-#include "SpatialMappingPlugin.h"
+#include "LocatableCamPlugin.h"
+#include "Modules/ModuleManager.h"
+#include "QRTrackingPlugin.h"
+#include "SceneUnderstandingPlugin.h"
 #include "SecondaryViewConfiguration.h"
+#include "ShaderCore.h"
+#include "SpatialAnchorPlugin.h"
+#include "SpatialMappingPlugin.h"
+#include "SpeechPlugin.h"
 
 #define LOCTEXT_NAMESPACE "FMicrosoftOpenXRModule"
 
@@ -36,7 +37,10 @@ namespace MicrosoftOpenXR
 			LocatableCamPlugin.Register();
 			SpeechPlugin.Register();
 			SpatialMappingPlugin.Register();
-#endif
+#if !UE_VERSION_OLDER_THAN(4, 27, 1)
+			SceneUnderstandingPlugin.Register();
+#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
+#endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
 			HolographicRemotingPlugin = MakeShared<FHolographicRemotingPlugin>();
@@ -62,7 +66,10 @@ namespace MicrosoftOpenXR
 			LocatableCamPlugin.Unregister();
 			SpeechPlugin.Unregister();
 			SpatialMappingPlugin.Unregister();
-#endif
+#if !UE_VERSION_OLDER_THAN(4, 27, 1)
+			SceneUnderstandingPlugin.Unregister();
+#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
+#endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
 			HolographicRemotingPlugin->Unregister();
@@ -81,7 +88,10 @@ namespace MicrosoftOpenXR
 		FLocatableCamPlugin LocatableCamPlugin;
 		FSpeechPlugin SpeechPlugin;
 		FSpatialMappingPlugin SpatialMappingPlugin;
-#endif
+#if !UE_VERSION_OLDER_THAN(4, 27, 1)
+		FSceneUnderstandingPlugin SceneUnderstandingPlugin;
+#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
+#endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
 		TSharedPtr<FHolographicRemotingPlugin> HolographicRemotingPlugin;
@@ -92,7 +102,6 @@ namespace MicrosoftOpenXR
 #endif
 	};
 }	 // namespace MicrosoftOpenXR
-
 
 bool UMicrosoftOpenXRFunctionLibrary::SetUseHandMesh(EHandMeshStatus Mode)
 {
@@ -108,7 +117,6 @@ bool UMicrosoftOpenXRFunctionLibrary::IsQREnabled()
 #endif
 }
 
-
 FTransform UMicrosoftOpenXRFunctionLibrary::GetPVCameraToWorldTransform()
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
@@ -118,10 +126,12 @@ FTransform UMicrosoftOpenXRFunctionLibrary::GetPVCameraToWorldTransform()
 #endif
 }
 
-bool UMicrosoftOpenXRFunctionLibrary::GetPVCameraIntrinsics(FVector2D& focalLength, int& width, int& height, FVector2D& principalPoint, FVector& radialDistortion, FVector2D& tangentialDistortion)
+bool UMicrosoftOpenXRFunctionLibrary::GetPVCameraIntrinsics(FVector2D& focalLength, int& width, int& height,
+	FVector2D& principalPoint, FVector& radialDistortion, FVector2D& tangentialDistortion)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
-	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->LocatableCamPlugin.GetPVCameraIntrinsics(focalLength, width, height, principalPoint, radialDistortion, tangentialDistortion);
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->LocatableCamPlugin.GetPVCameraIntrinsics(
+		focalLength, width, height, principalPoint, radialDistortion, tangentialDistortion);
 #else
 	return false;
 #endif
@@ -159,7 +169,7 @@ void UMicrosoftOpenXRFunctionLibrary::RemoveKeywords(TArray<FString> Keywords)
 #endif
 }
 
-bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, ::IUnknown** OutPerceptionAnchor)
+bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* AnchorID, void** OutPerceptionAnchor)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
@@ -167,13 +177,14 @@ bool UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor(void* 
 		return false;
 	}
 
-	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.GetPerceptionAnchorFromOpenXRAnchor((XrSpatialAnchorMSFT)AnchorID, OutPerceptionAnchor);
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.GetPerceptionAnchorFromOpenXRAnchor(
+		(XrSpatialAnchorMSFT) AnchorID, (::IUnknown**)OutPerceptionAnchor);
 #else
 	return false;
 #endif
 }
 
-bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, ::IUnknown* InPerceptionAnchor)
+bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPinId, void* InPerceptionAnchor)
 {
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	if (MicrosoftOpenXR::g_MicrosoftOpenXRModule == nullptr)
@@ -181,10 +192,31 @@ bool UMicrosoftOpenXRFunctionLibrary::StorePerceptionAnchor(const FString& InPin
 		return false;
 	}
 
-	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, InPerceptionAnchor);
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SpatialAnchorPlugin.StorePerceptionAnchor(InPinId, (::IUnknown*)InPerceptionAnchor);
 #else
 	return false;
 #endif
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::IsRemoting()
+{
+#if SUPPORTS_REMOTING
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->HolographicRemotingPlugin->IsRemoting();
+#endif
+
+	return false;
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::CanDetectPlanes()
+{
+#if UE_VERSION_OLDER_THAN(4, 27, 1)
+	// SU was introduced in 4.27.1
+	return false;
+#elif PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SceneUnderstandingPlugin.CanDetectPlanes();
+#endif
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -491,7 +491,7 @@ EAzureSpatialAnchorsResult FAzureSpatialAnchorsForOpenXR::ConstructAnchor(UARPin
 		MicrosoftOpenXR::SAnchorMSFT* AnchorMSFT = reinterpret_cast<MicrosoftOpenXR::SAnchorMSFT*>(nativeResource);
 
 		winrt::Windows::Perception::Spatial::SpatialAnchor localAnchor = nullptr;
-		if (UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor((void*)AnchorMSFT->Anchor, (::IUnknown**)&localAnchor))
+		if (UMicrosoftOpenXRFunctionLibrary::GetPerceptionAnchorFromOpenXRAnchor((void*)AnchorMSFT->Anchor, (void**)&localAnchor))
 		{
 			winrt::Microsoft::Azure::SpatialAnchors::CloudSpatialAnchor newCloudAnchor;
 			newCloudAnchor.LocalAnchor(localAnchor);

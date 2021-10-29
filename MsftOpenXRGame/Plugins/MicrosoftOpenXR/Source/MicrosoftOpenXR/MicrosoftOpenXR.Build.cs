@@ -87,5 +87,31 @@ public class MicrosoftOpenXR : ModuleRules
 				"NuGetModule"
 			}
 			);
+
+		// DX-specific code for webcam texture processing
+		if (Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.HoloLens)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {
+					"D3D11RHI",
+					"D3D12RHI"
+				});
+
+			var EngineDir = Path.GetFullPath(Target.RelativeEnginePath);
+			PrivateIncludePaths.AddRange(
+				new string[] {
+							Path.Combine(EngineDir, @"Source\Runtime\Windows\D3D11RHI\Private"),
+							Path.Combine(EngineDir, @"Source\Runtime\Windows\D3D11RHI\Private\Windows"),
+							Path.Combine(EngineDir, @"Source\Runtime\D3D12RHI\Private"),
+							Path.Combine(EngineDir, @"Source\Runtime\D3D12RHI\Private\Windows")
+							});
+
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "DX11");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "DX12");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "NVAPI");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "AMD_AGS");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "NVAftermath");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "IntelMetricsDiscovery");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "IntelExtensionsFramework");
+		}
 	}
 }
