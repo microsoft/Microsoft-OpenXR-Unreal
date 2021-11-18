@@ -39,7 +39,7 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 ## Use the plugin from GitHub source
 
-1. If you have the MicrosoftOpenXR plugin installed from the Epic Marketplace, first uninstall that plugin so it will not collide with the source version.
+1. If you have the MicrosoftOpenXR plugin installed from the Unreal Engine Marketplace, first uninstall that plugin so it will not collide with the source version.
 2. Copy MsftOpenXRGame/Plugins/MicrosoftOpenXR to your game's Plugins directory.  Skip this step if using the example MsftOpenXRGame project.
 3. This plugin maintains compatibility with older engine versions, so using the source directly may not work as expected in the latest engine release.  
     If you see this message prompt, you *must* retarget the plugin to match your engine version:
