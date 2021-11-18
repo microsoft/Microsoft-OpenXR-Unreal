@@ -41,9 +41,11 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 1. Copy MsftOpenXRGame/Plugins/MicrosoftOpenXR to your game's Plugins directory.  Skip this step if using the example MsftOpenXRGame project.
 
-2. This plugin maintains compatibility with older engine versions, so using the source directly may not work as expected in the latest engine release.  If you see this message prompt, you *must* retarget the plugin to match your engine version:
-![The 'MicrosoftOpenXR' plugin was designed for build 4.26.0. Attempt to load it anyway?](Docs/Images/InvalidVersion.png)   
-Modify the ["EngineVersion"](https://github.com/microsoft/Microsoft-OpenXR-Unreal/blob/fccb12a31070bab0d45e8e948f809e6dbdde5937/MsftOpenXRGame/Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin#L13) string in Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin to match the engine version you are using.
+2. This plugin maintains compatibility with older engine versions, so using the source directly may not work as expected in the latest engine release.  
+    If you see this message prompt, you *must* retarget the plugin to match your engine version:
+    ![The 'MicrosoftOpenXR' plugin was designed for build 4.26.0. Attempt to load it anyway?](Docs/Images/InvalidVersion.png)   
+
+    Modify the ["EngineVersion"](https://github.com/microsoft/Microsoft-OpenXR-Unreal/blob/fccb12a31070bab0d45e8e948f809e6dbdde5937/MsftOpenXRGame/Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin#L13) string in Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin to match the engine version you are using.
     1. For example, if you are using UE **4.27**, change the line to: **"EngineVersion": "4.27.0"**
 3. Reopen the project and the plugin will load correctly.
 
