@@ -362,7 +362,16 @@ namespace MicrosoftOpenXR
 			XrSpatialAnchorPersistenceInfoMSFT PersistenceInfo{ XR_TYPE_SPATIAL_ANCHOR_PERSISTENCE_INFO_MSFT };
 
 			FTCHARToUTF8 UTF8ConvertedString(*SaveId);
-			memcpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
+			// Length() returns size without null terminator.
+			// Anchor name is valid up to XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT - 1 to ensure room for a null terminator.
+			if (UTF8ConvertedString.Length() >= XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT)
+			{
+				UE_LOG(LogHMD, Warning, TEXT("Pin name is too long.  ARPin will not be saved."));
+				return false;
+			}
+
+			// Length + 1 to ensure null terminator is included
+			FPlatformString::Strncpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length() + 1);
 			PersistenceInfo.spatialAnchor = AnchorMSFT->Anchor;
 
 			XrResult result = xrPersistSpatialAnchorMSFT(SpatialAnchorStoreMSFT, &PersistenceInfo);
@@ -406,7 +415,16 @@ namespace MicrosoftOpenXR
 			XrSpatialAnchorPersistenceNameMSFT SpatialAnchorPersistenceName;
 
 			FTCHARToUTF8 UTF8ConvertedString(*SaveId);
-			memcpy(SpatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
+			// Length() returns size without null terminator.
+			// Anchor name is valid up to XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT - 1 to ensure room for a null terminator.
+			if (UTF8ConvertedString.Length() >= XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT)
+			{
+				UE_LOG(LogHMD, Warning, TEXT("Pin name is too long.  Anchor will not be removed."));
+				return;
+			}
+
+			// Length + 1 to ensure null terminator is included
+			FPlatformString::Strncpy(SpatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length() + 1);
 
 			xrUnpersistSpatialAnchorMSFT(SpatialAnchorStoreMSFT, &SpatialAnchorPersistenceName);
 			return;
@@ -487,7 +505,17 @@ namespace MicrosoftOpenXR
 			XrSpatialAnchorPersistenceInfoMSFT PersistenceInfo{ XR_TYPE_SPATIAL_ANCHOR_PERSISTENCE_INFO_MSFT };
 
 			FTCHARToUTF8 UTF8ConvertedString(*InPinId.ToLower());
-			memcpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length());
+			
+			// Length() returns size without null terminator.
+			// Anchor name is valid up to XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT - 1 to ensure room for a null terminator.
+			if (UTF8ConvertedString.Length() >= XR_MAX_SPATIAL_ANCHOR_NAME_SIZE_MSFT)
+			{
+				UE_LOG(LogHMD, Warning, TEXT("Pin name is too long.  Perception anchor will not be stored."));
+				return false;
+			}
+
+			// Length + 1 to ensure null terminator is included
+			FPlatformString::Strncpy(PersistenceInfo.spatialAnchorPersistenceName.name, UTF8ConvertedString.Get(), UTF8ConvertedString.Length() + 1);
 
 			PersistenceInfo.spatialAnchor = AnchorMSFT->Anchor;
 
