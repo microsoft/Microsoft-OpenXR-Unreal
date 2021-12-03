@@ -37,6 +37,18 @@ through the installation, core concepts, and usage of the Microsoft OpenXR plugi
 
 # Using the Microsoft OpenXR plugin
 
+## Use the plugin from GitHub source
+
+1. If you have the MicrosoftOpenXR plugin installed from the Unreal Engine Marketplace, first uninstall that plugin so it will not collide with the source version.
+2. Copy MsftOpenXRGame/Plugins/MicrosoftOpenXR to your game's Plugins directory.  Skip this step if using the example MsftOpenXRGame project.
+3. This plugin maintains compatibility with older engine versions, so using the source directly may not work as expected in the latest engine release.  
+    If you see this message prompt, you *must* retarget the plugin to match your engine version:
+    ![The 'MicrosoftOpenXR' plugin was designed for build 4.26.0. Attempt to load it anyway?](Docs/Images/InvalidVersion.png)   
+
+    Modify the ["EngineVersion"](https://github.com/microsoft/Microsoft-OpenXR-Unreal/blob/fccb12a31070bab0d45e8e948f809e6dbdde5937/MsftOpenXRGame/Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin#L13) string in Plugins/MicrosoftOpenXR/MicrosoftOpenXR.uplugin to match the engine version you are using.
+    For example, if you are using UE **4.27**, change the line to: **"EngineVersion": "4.27.0"**
+4. Reopen the project and the plugin will load correctly.
+
 ## Install the plugin from the Unreal Marketplace
 
 1. Install the [Microsoft OpenXR](https://www.unrealengine.com/marketplace/product/ef8930ca860148c498b46887da196239) plugin from the Unreal Engine Marketplace to your engine. 
