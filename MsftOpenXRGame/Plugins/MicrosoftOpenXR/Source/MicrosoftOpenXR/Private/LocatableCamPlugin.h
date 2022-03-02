@@ -102,6 +102,8 @@ namespace MicrosoftOpenXR
 
 		FTransform PVCameraToWorldMatrix;
 		TSharedPtr< FSharedTextureHolder> SharedTextureHolder;
+
+		bool IsCameraCaptureDesired = false;
 	};
 }	 // namespace MicrosoftOpenXR
 

@@ -11,6 +11,7 @@
 #include "IXRTrackingSystem.h"
 #include "OpenXRCameraImageTexture.h"
 #include "ARSessionConfig.h"
+#include "Misc/CoreDelegates.h"
 
 #include "WindowsMixedRealityInteropUtility.h"
 
@@ -133,12 +134,31 @@ namespace MicrosoftOpenXR
 	void FLocatableCamPlugin::Register()
 	{
 		IModularFeatures::Get().RegisterModularFeature(IOpenXRExtensionPlugin::GetModularFeatureName(), static_cast<IOpenXRExtensionPlugin*>(this));
+
+		FCoreDelegates::ApplicationHasEnteredForegroundDelegate.AddLambda([this]()
+		{
+			if (IsCameraCaptureDesired)
+			{
+				OnToggleARCapture(true);
+			}
+		});
+
+		FCoreDelegates::ApplicationWillEnterBackgroundDelegate.AddLambda([this]()
+		{
+			if (IsCameraCaptureDesired)
+			{
+				StopCameraCapture();
+			}
+		});
 	}
 
 	void FLocatableCamPlugin::Unregister()
 	{
 		StopCameraCapture();
 		IModularFeatures::Get().UnregisterModularFeature(IOpenXRExtensionPlugin::GetModularFeatureName(), static_cast<IOpenXRExtensionPlugin*>(this));
+
+		FCoreDelegates::ApplicationHasEnteredForegroundDelegate.RemoveAll(this);
+		FCoreDelegates::ApplicationWillEnterBackgroundDelegate.RemoveAll(this);
 	}
 
 	void FLocatableCamPlugin::StartCameraCapture(int DesiredWidth, int DesiredHeight, int DesiredFPS)
@@ -156,7 +176,12 @@ namespace MicrosoftOpenXR
 		FindAllAsyncOp.Completed([=](auto&& asyncInfo, auto&& asyncStatus)
 		{
 			std::lock_guard<std::recursive_mutex> lock(RefsLock);
-			if (AsyncInfo.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
+			if (asyncStatus == winrt::Windows::Foundation::AsyncStatus::Canceled)
+			{
+				// Do not reset AsyncInfo reference here since the function that cancelled this already reassigned it.
+				return;
+			}
+			else if (asyncStatus != winrt::Windows::Foundation::AsyncStatus::Completed)
 			{
 				AsyncInfo = nullptr;
 				return;
@@ -256,7 +281,12 @@ namespace MicrosoftOpenXR
 			InitializeAsyncOp.Completed([=](auto&& asyncInfo, auto&& asyncStatus)
 			{
 				std::lock_guard<std::recursive_mutex> lock(RefsLock);
-				if (AsyncInfo.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
+				if (asyncStatus == winrt::Windows::Foundation::AsyncStatus::Canceled)
+				{
+					// Do not reset AsyncInfo reference here since the function that cancelled this already reassigned it.
+					return;
+				}
+				else if (asyncStatus != winrt::Windows::Foundation::AsyncStatus::Completed)
 				{
 					AsyncInfo = nullptr;
 					UE_LOG(LogHMD, Log, TEXT("Failed to open camera, please check Webcam capability"));
@@ -273,7 +303,12 @@ namespace MicrosoftOpenXR
 				CreateFrameReaderAsyncOp.Completed([=](auto&& asyncInfo, auto&& asyncStatus)
 				{
 					std::lock_guard<std::recursive_mutex> lock(RefsLock);
-					if (AsyncInfo.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
+					if (asyncStatus == winrt::Windows::Foundation::AsyncStatus::Canceled)
+					{
+						// Do not reset AsyncInfo reference here since the function that cancelled this already reassigned it.
+						return;
+					}
+					else if (asyncStatus != winrt::Windows::Foundation::AsyncStatus::Completed)
 					{
 						AsyncInfo = nullptr;
 						return;
@@ -287,7 +322,12 @@ namespace MicrosoftOpenXR
 					{
 						std::lock_guard<std::recursive_mutex> lock(RefsLock);
 						// Finally, copy to our object
-						if (AsyncInfo.Status() != winrt::Windows::Foundation::AsyncStatus::Completed)
+						if (asyncStatus == winrt::Windows::Foundation::AsyncStatus::Canceled)
+						{
+							// Do not reset AsyncInfo reference here since the function that cancelled this already reassigned it.
+							return;
+						}
+						else if (asyncStatus != winrt::Windows::Foundation::AsyncStatus::Completed)
 						{
 							AsyncInfo = nullptr;
 							return;
@@ -540,6 +580,8 @@ namespace MicrosoftOpenXR
 			UE_LOG(LogHMD, Warning, TEXT("Camera ARCapture is not supported over remoting."));
 			return false;
 		}
+
+		IsCameraCaptureDesired = bOnOff;
 
 		if (bOnOff)
 		{
