@@ -571,6 +571,12 @@ namespace MicrosoftOpenXR
 						// A location was not found, hide the mesh until it is located.
 						MeshUpdate->LocalToTrackingTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector::ZeroVector);
 					}
+
+#if !UE_VERSION_OLDER_THAN(4, 27, 1)
+					MeshUpdate->SpatialMeshUsageFlags =
+						(EARSpatialMeshUsageFlags)((int32)EARSpatialMeshUsageFlags::Visible |
+							(int32)EARSpatialMeshUsageFlags::Collision);
+#endif
 				}
 
 				UuidToLocateThisFrame++;
