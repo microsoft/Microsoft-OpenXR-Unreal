@@ -9,7 +9,6 @@
 #include "IOpenXRARTrackedGeometryHolder.h"
 #include "IXRTrackingSystem.h"
 #include "MicrosoftOpenXR.h"
-#include "Misc/EngineVersionComparison.h"
 #include "OpenXRCore.h"
 #include "SceneUnderstandingUtility.h"
 #include "TrackedGeometryCollision.h"

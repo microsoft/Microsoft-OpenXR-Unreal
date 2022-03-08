@@ -11,7 +11,6 @@
 #include "IOpenXRARTrackedGeometryHolder.h"
 #include "IXRTrackingSystem.h"
 #include "MicrosoftOpenXR.h"
-#include "Misc/EngineVersionComparison.h"
 #include "OpenXRCore.h"
 #include "SceneUnderstandingUtility.h"
 #include "TrackedGeometryCollision.h"
@@ -137,14 +136,16 @@ namespace MicrosoftOpenXR
 
 			if (MeshBufferID != 0)
 			{
-				ReadMeshBuffers(Scene.Handle(), Ext, MeshBufferID, PlaneUpdate.Vertices, PlaneUpdate.Indices);
-
-				for (FVector& Vertex : PlaneUpdate.Vertices)
+				TArray<XrVector3f> MeshVertices;
+				ReadMeshBuffers(Scene.Handle(), Ext, MeshBufferID, MeshVertices, PlaneUpdate.Indices);
+				PlaneUpdate.Vertices.SetNum(MeshVertices.Num());
+				for (int32 i = 0; i < MeshVertices.Num(); i++)
 				{
-					Vertex.Z = -Vertex.Z;
-					Vertex *= WorldToMetersScale;
-					Vertex = FVector(Vertex.Z, Vertex.X, Vertex.Y);
+					const XrVector3f& SrcVertex = MeshVertices[i];
+					PlaneUpdate.Vertices[i] = FVector(
+						-SrcVertex.z * WorldToMetersScale, SrcVertex.x * WorldToMetersScale, SrcVertex.y * WorldToMetersScale);
 				}
+
 				MeshCollisionInfo.Add(MeshGuid, TrackedGeometryCollision(PlaneUpdate.Vertices, PlaneUpdate.Indices));
 			}
 			// The planes and meshes will need to be located on the main thread using the DisplayTime.
@@ -213,16 +214,10 @@ namespace MicrosoftOpenXR
 			const FGuid PlaneGuid = XrUuidMSFTToFGuid(Uuid);
 			FPlaneUpdate& Plane = Planes.FindChecked(Uuid);
 
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
 			auto PlaneUpdate = MakeShared<FOpenXRMeshUpdate>();
-#else
-			auto PlaneUpdate = new FOpenXRMeshUpdate();
-#endif
 			const FGuid Guid = XrUuidMSFTToFGuid(Uuid);
 			PlaneUpdate->Id = XrUuidMSFTToFGuid(Uuid);
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
 			PlaneUpdate->SpatialMeshUsageFlags = (EARSpatialMeshUsageFlags)((int32)EARSpatialMeshUsageFlags::Visible);
-#endif
 			if (IsPoseValid(Location.flags))
 			{
 				PlaneUpdate->TrackingState = EARTrackingState::Tracking;
@@ -241,19 +236,13 @@ namespace MicrosoftOpenXR
 
 			if (const FPlaneData* PlaneData = PreviousPlanes.Find(Uuid); PlaneData != nullptr)
 			{
-#if !UE_VERSION_OLDER_THAN(4, 27, 0)
 				auto MeshUpdate = MakeShared<FOpenXRMeshUpdate>();
-#else
-				auto MeshUpdate = new FOpenXRMeshUpdate();
-#endif
 				const FGuid& MeshGuid = PlaneData->MeshGuid;
 
 				MeshUpdate->Id = MeshGuid;
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
 				MeshUpdate->SpatialMeshUsageFlags =
 					(EARSpatialMeshUsageFlags)((int32)EARSpatialMeshUsageFlags::Visible |
 						(int32)EARSpatialMeshUsageFlags::Collision);
-#endif
 				if (IsPoseValid(Location.flags))
 				{
 					MeshUpdate->TrackingState = EARTrackingState::Tracking;

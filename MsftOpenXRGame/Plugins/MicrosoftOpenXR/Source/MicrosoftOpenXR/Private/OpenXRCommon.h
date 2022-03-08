@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <openxr/openxr.h>
+#include <openxr_private/openxr.h>
 
 #include "HAL/Platform.h"
 
@@ -21,7 +21,7 @@
 #include <winrt/Windows.Foundation.Collections.h>
 #endif
 
-#include <openxr/openxr_platform.h>
+#include <openxr_private/openxr_platform.h>
 
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 #include "Windows/PostWindowsApi.h"
@@ -29,7 +29,8 @@
 #include "Windows/HideWindowsPlatformTypes.h"
 #endif
 
-#include "IOpenXRHMDPlugin.h"
+#include "IOpenXRHMDModule.h"
+#include "IOpenXRARModule.h"
 #include "IOpenXRExtensionPlugin.h"
 
 namespace MicrosoftOpenXR

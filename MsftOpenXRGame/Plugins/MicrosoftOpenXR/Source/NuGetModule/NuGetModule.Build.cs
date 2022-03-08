@@ -3,11 +3,10 @@
 
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using UnrealBuildTool;
-using Tools.DotNETCommon;
 using System;
 using System.Collections.Generic;
+using EpicGames.Core;
+using UnrealBuildTool;
 
 public class NuGetModule : ModuleRules
 {
@@ -47,10 +46,14 @@ public class NuGetModule : ModuleRules
 			string NugetExe = Path.Combine(NugetFolder, "nuget.exe");
 			if (!File.Exists(NugetExe))
 			{
-				using (System.Net.WebClient myWebClient = new System.Net.WebClient())
+				// The System.Net assembly is not referenced by the build tool so it must be loaded dynamically.
+				var assembly = System.Reflection.Assembly.Load("System.Net");
+				var webClient = assembly.CreateInstance("System.Net.WebClient");
+				using ((IDisposable)webClient)
 				{
 					// we aren't focusing on a specific nuget version, we can use any of them but the latest one is preferable
-					myWebClient.DownloadFile(@"https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", NugetExe);
+					var downloadFileMethod = webClient.GetType().GetMethod("DownloadFile", new Type[] { typeof(string), typeof(string) });
+					downloadFileMethod.Invoke(webClient, new object[] { @"https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", NugetExe } );
 				}
 			}
 

@@ -73,7 +73,7 @@ namespace MicrosoftOpenXR
 			break;
 		case XR_TYPE_REMOTING_EVENT_DATA_DISCONNECTED_MSFT:
 			UpdateDisconnectedText();
-			
+
 			// Workaround for UEVR-2238
 			// When remoting disconnects the OpenXR session is destroyed.
 			// Currently DestroySession does not reset the VRFocus, which prevents input from working when remoting.
@@ -373,11 +373,7 @@ namespace MicrosoftOpenXR
 		// OpenXRHMD will fire a RequestExit when the remoting runtime fails to connect.
 		// 
 		// A Standalone Game PIE should fall back to parsing the command line if remoting is desired.
-#if !UE_VERSION_OLDER_THAN(4, 27, 0)
-		// 4.27 moved GetCustomLoader() later to the RHI initialization, after many engine globals have been initialized.
-		// 4.26 initialization is too early to use IsGame, and will prevent the editor from loading the remoting runtime.
 		if (!FApp::IsGame())
-#endif
 		{
 			ParseRemotingConfig();
 		}

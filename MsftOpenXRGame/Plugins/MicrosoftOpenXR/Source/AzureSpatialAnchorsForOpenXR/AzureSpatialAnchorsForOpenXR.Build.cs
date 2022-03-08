@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnrealBuildTool;
-using Tools.DotNETCommon;
-using System.Collections.Generic;
 
 namespace UnrealBuildTool.Rules
 {

@@ -230,9 +230,8 @@ namespace MicrosoftOpenXR
 
 	// Reads mesh vertices and 32-bit indices.
 	inline void ReadMeshBuffers(XrSceneMSFT SceneHandle, const ExtensionDispatchTable& Ext, uint64_t MeshBufferId,
-		TArray<FVector>& VertexBuffer, TArray<uint32_t>& IndexBuffer)
+		TArray<XrVector3f>& VertexBuffer, TArray<uint32_t>& IndexBuffer)
 	{
-		static_assert(sizeof(XrVector3f) == sizeof(FVector));
 		XrSceneMeshBuffersGetInfoMSFT MeshGetInfo{XR_TYPE_SCENE_MESH_BUFFERS_GET_INFO_MSFT};
 		MeshGetInfo.meshBufferId = MeshBufferId;
 
@@ -247,7 +246,7 @@ namespace MicrosoftOpenXR
 		IndexBuffer.SetNum(Indices.indexCountOutput);
 		Vertices.vertexCapacityInput = Vertices.vertexCountOutput;
 		Indices.indexCapacityInput = Indices.indexCountOutput;
-		Vertices.vertices = reinterpret_cast<XrVector3f*>(VertexBuffer.GetData());
+		Vertices.vertices = VertexBuffer.GetData();
 		Indices.indices = IndexBuffer.GetData();
 		XR_ENSURE(Ext.xrGetSceneMeshBuffersMSFT(SceneHandle, &MeshGetInfo, &MeshBuffers));
 		VertexBuffer.SetNum(Vertices.vertexCountOutput);
@@ -256,9 +255,8 @@ namespace MicrosoftOpenXR
 
 	// Reads mesh vertices and 16-bit indices.
 	inline void ReadMeshBuffers(XrSceneMSFT SceneHandle, const ExtensionDispatchTable& Ext, uint64_t MeshBufferId,
-		TArray<FVector>& VertexBuffer, TArray<uint16_t>& IndexBuffer)
+		TArray<XrVector3f>& VertexBuffer, TArray<uint16_t>& IndexBuffer)
 	{
-		static_assert(sizeof(XrVector3f) == sizeof(FVector));
 		XrSceneMeshBuffersGetInfoMSFT MeshGetInfo{XR_TYPE_SCENE_MESH_BUFFERS_GET_INFO_MSFT};
 		MeshGetInfo.meshBufferId = MeshBufferId;
 
@@ -273,7 +271,7 @@ namespace MicrosoftOpenXR
 		IndexBuffer.SetNum(Indices.indexCountOutput);
 		Vertices.vertexCapacityInput = Vertices.vertexCountOutput;
 		Indices.indexCapacityInput = Indices.indexCountOutput;
-		Vertices.vertices = reinterpret_cast<XrVector3f*>(VertexBuffer.GetData());
+		Vertices.vertices = VertexBuffer.GetData();
 		Indices.indices = IndexBuffer.GetData();
 		XR_ENSURE(Ext.xrGetSceneMeshBuffersMSFT(SceneHandle, &MeshGetInfo, &MeshBuffers));
 		VertexBuffer.SetNum(Vertices.vertexCountOutput);

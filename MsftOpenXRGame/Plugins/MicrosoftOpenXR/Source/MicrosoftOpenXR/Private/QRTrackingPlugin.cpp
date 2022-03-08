@@ -166,12 +166,7 @@ namespace MicrosoftOpenXR
 
 	void FQRTrackingPlugin::OnAdded(QRCodeWatcher sender, QRCodeAddedEventArgs args)
 	{
-#if !UE_VERSION_OLDER_THAN(4, 27, 0)
 		auto QRCode = MakeShared<FOpenXRQRCodeData>();
-#else
-		auto QRCode = new FOpenXRQRCodeData();
-#endif
-
 		auto InCode = args.Code();
 
 		QRCode->Id = WMRUtility::GUIDToFGuid(InCode.Id());
@@ -200,12 +195,7 @@ namespace MicrosoftOpenXR
 
 	void FQRTrackingPlugin::OnRemoved(QRCodeWatcher sender, QRCodeRemovedEventArgs args)
 	{
-#if !UE_VERSION_OLDER_THAN(4, 27, 0)
 		auto QRCode = MakeShared<FOpenXRQRCodeData>();
-#else
-		auto QRCode = new FOpenXRQRCodeData();
-#endif
-
 		auto InCode = args.Code();
 
 		QRCode->Id = WMRUtility::GUIDToFGuid(InCode.Id());
@@ -246,12 +236,7 @@ namespace MicrosoftOpenXR
 				}
 			}
 
-#if !UE_VERSION_OLDER_THAN(4, 27, 0)
 			auto OutCode = MakeShared<FOpenXRQRCodeData>();
-#else
-			auto OutCode = new FOpenXRQRCodeData();
-#endif
-
 			OutCode->Id = OutGuid;
 			OutCode->Version = (int32_t)InCode.Version();
 			OutCode->QRCode = InCode.Data().c_str();
