@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #include "MicrosoftOpenXR.h"
-
 #include "CoreMinimal.h"
 #include "HandMeshPlugin.h"
 #include "HolographicRemotingPlugin.h"
@@ -22,7 +21,7 @@
 
 namespace MicrosoftOpenXR
 {
-	static class FMicrosoftOpenXRModule * g_MicrosoftOpenXRModule;
+	static class FMicrosoftOpenXRModule* g_MicrosoftOpenXRModule;
 
 	class FMicrosoftOpenXRModule : public IModuleInterface
 	{
@@ -32,14 +31,12 @@ namespace MicrosoftOpenXR
 			SpatialAnchorPlugin.Register();
 			HandMeshPlugin.Register();
 			SecondaryViewConfigurationPlugin.Register();
+			SceneUnderstandingPlugin.Register();
+			SpatialMappingPlugin.Register();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 			QRTrackingPlugin.Register();
 			LocatableCamPlugin.Register();
 			SpeechPlugin.Register();
-			SpatialMappingPlugin.Register();
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
-			SceneUnderstandingPlugin.Register();
-#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
 #endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
@@ -61,14 +58,12 @@ namespace MicrosoftOpenXR
 			SpatialAnchorPlugin.Unregister();
 			HandMeshPlugin.Unregister();
 			SecondaryViewConfigurationPlugin.Unregister();
+			SceneUnderstandingPlugin.Unregister();
+			SpatialMappingPlugin.Unregister();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 			QRTrackingPlugin.Unregister();
 			LocatableCamPlugin.Unregister();
 			SpeechPlugin.Unregister();
-			SpatialMappingPlugin.Unregister();
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
-			SceneUnderstandingPlugin.Unregister();
-#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
 #endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
@@ -83,14 +78,12 @@ namespace MicrosoftOpenXR
 		FSecondaryViewConfigurationPlugin SecondaryViewConfigurationPlugin;
 		FHandMeshPlugin HandMeshPlugin;
 		FSpatialAnchorPlugin SpatialAnchorPlugin;
+		FSceneUnderstandingPlugin SceneUnderstandingPlugin;
+		FSpatialMappingPlugin SpatialMappingPlugin;
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 		FQRTrackingPlugin QRTrackingPlugin;
 		FLocatableCamPlugin LocatableCamPlugin;
 		FSpeechPlugin SpeechPlugin;
-		FSpatialMappingPlugin SpatialMappingPlugin;
-#if !UE_VERSION_OLDER_THAN(4, 27, 1)
-		FSceneUnderstandingPlugin SceneUnderstandingPlugin;
-#endif	  // !UE_VERSION_OLDER_THAN(4, 27, 1)
 #endif	  // PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 
 #if SUPPORTS_REMOTING
@@ -209,14 +202,7 @@ bool UMicrosoftOpenXRFunctionLibrary::IsRemoting()
 
 bool UMicrosoftOpenXRFunctionLibrary::CanDetectPlanes()
 {
-#if UE_VERSION_OLDER_THAN(4, 27, 1)
-	// SU was introduced in 4.27.1
-	return false;
-#elif PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SceneUnderstandingPlugin.CanDetectPlanes();
-#endif
-
-	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -44,7 +44,7 @@ DECLARE_DELEGATE_OneParam(FMicrosoftOpenXRRemotingConnect, MicrosoftOpenXR::Remo
 DECLARE_DELEGATE(FMicrosoftOpenXRRemotingDisconnect);
 
 /**
- * Implements the settings for the WindowsMixedReality runtime platform.
+ * Implements the settings for Microsoft OpenXR runtime platforms.
  */
 UCLASS(config=EditorPerProjectUserSettings)
 class MICROSOFTOPENXRRUNTIMESETTINGS_API UMicrosoftOpenXRRuntimeSettings : public UObject

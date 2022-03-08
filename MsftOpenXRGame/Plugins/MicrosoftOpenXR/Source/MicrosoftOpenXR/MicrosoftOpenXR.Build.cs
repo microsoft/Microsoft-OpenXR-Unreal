@@ -1,13 +1,11 @@
 // Copyright (c) 2020 Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.IO;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using UnrealBuildTool;
-using Tools.DotNETCommon;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnrealBuildTool;
 
 public class MicrosoftOpenXR : ModuleRules
 {
@@ -32,7 +30,6 @@ public class MicrosoftOpenXR : ModuleRules
 			}
 			);
 
-
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -49,6 +46,7 @@ public class MicrosoftOpenXR : ModuleRules
 				"AugmentedReality",
 				"OpenXRAR",
 				"RHI",
+				"RHICore",
 				"RenderCore",
 				"Projects",
 				"NuGetModule"
