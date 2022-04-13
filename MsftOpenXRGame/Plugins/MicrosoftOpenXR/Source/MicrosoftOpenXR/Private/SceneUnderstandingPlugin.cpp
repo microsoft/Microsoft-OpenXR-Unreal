@@ -11,12 +11,6 @@ namespace MicrosoftOpenXR
 
 	bool FSceneUnderstandingPlugin::GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions)
 	{
-#if UE_VERSION_OLDER_THAN(4, 27, 1)
-		// Scene Understanding requires engine fixes introduced in 4.27.1
-		UE_LOG(LogHMD, Warning, TEXT("Scene Understanding requires at least 4.27.1."));
-		return false;
-#endif
-
 		return FSceneUnderstandingBase::GetRequiredExtensions(OutExtensions);
 	}
 

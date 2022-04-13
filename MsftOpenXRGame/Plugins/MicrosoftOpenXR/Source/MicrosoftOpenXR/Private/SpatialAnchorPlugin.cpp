@@ -66,7 +66,7 @@ namespace MicrosoftOpenXR
 		XR_ENSURE_MSFT(xrGetInstanceProcAddr(InInstance, "xrDestroySpatialAnchorMSFT", (PFN_xrVoidFunction*) &xrDestroySpatialAnchorMSFT));
 
 		bIsAnchorPersistenceExtensionSupported =
-			IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_SPATIAL_ANCHOR_PERSISTENCE_EXTENSION_NAME);
+			IOpenXRHMDModule::Get().IsExtensionEnabled(XR_MSFT_SPATIAL_ANCHOR_PERSISTENCE_EXTENSION_NAME);
 
 		if (bIsAnchorPersistenceExtensionSupported)
 		{
@@ -81,7 +81,7 @@ namespace MicrosoftOpenXR
 
 #if WINRT_ANCHOR_STORE_AVAILABLE 
 		bIsPerceptionAnchorInteropExtensionSupported =
-			IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_EXTENSION_NAME);
+			IOpenXRHMDModule::Get().IsExtensionEnabled(XR_MSFT_PERCEPTION_ANCHOR_INTEROP_EXTENSION_NAME);
 		
 		if (bIsPerceptionAnchorInteropExtensionSupported)
 		{
@@ -270,7 +270,7 @@ namespace MicrosoftOpenXR
 				XR_ENSURE_MSFT(xrCreateSpatialAnchorFromPersistedNameMSFT(
 					InSession, &CreateSpatialAnchorInfo, &SpatialAnchor));
 
-				XrSpatialAnchorSpaceCreateInfoMSFT AnchorSpaceCreateInfo{
+				XrSpatialAnchorSpaceCreateInfoMSFT AnchorSpaceCreateInfo{ 
 					XR_TYPE_SPATIAL_ANCHOR_SPACE_CREATE_INFO_MSFT };
 				AnchorSpaceCreateInfo.poseInAnchorSpace = ToXrPose(FTransform::Identity);
 				AnchorSpaceCreateInfo.anchor = SpatialAnchor;

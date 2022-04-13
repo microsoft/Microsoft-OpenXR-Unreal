@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OpenXRCommon.h"
+#include <assert.h>
 
 namespace MicrosoftOpenXR
 {

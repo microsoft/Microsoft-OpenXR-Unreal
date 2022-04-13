@@ -52,7 +52,7 @@ namespace MicrosoftOpenXR
 	{
 #if SUPPORTS_REMOTING
 		bIsRemotingSpeechExtensionEnabled =
-			IOpenXRHMDPlugin::Get().IsExtensionEnabled(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
+			IOpenXRHMDModule::Get().IsExtensionEnabled(XR_MSFT_HOLOGRAPHIC_REMOTING_SPEECH_EXTENSION_NAME);
 
 		if (bIsRemotingSpeechExtensionEnabled)
 		{
@@ -67,14 +67,14 @@ namespace MicrosoftOpenXR
 	const void* FSpeechPlugin::OnBeginSession(XrSession InSession, const void* InNext)
 	{
 		Session = InSession;
-
+		
 		// Add all speech keywords from the input system
 		const TArray <FInputActionSpeechMapping>& SpeechMappings = GetDefault<UInputSettings>()->GetSpeechMappings();
 		for (const FInputActionSpeechMapping& SpeechMapping : SpeechMappings)
 		{
 			FKey Key(SpeechMapping.GetKeyName());
 			FString Keyword = SpeechMapping.GetSpeechKeyword().ToString();
-			
+
 			RegisterKeyword(Key, Keyword);
 		}
 
@@ -278,8 +278,9 @@ namespace MicrosoftOpenXR
 		}
 
 		AsyncTask(ENamedThreads::GameThread, [InKey, PlayerController]()
-		{
-			PlayerController->InputKey(InKey, IE_Pressed, 1.0f, false);
+		{ 
+			FInputKeyParams key(InKey, IE_Pressed, 1.0, false);
+			PlayerController->InputKey(key);
 		});
 	}
 
@@ -295,7 +296,7 @@ namespace MicrosoftOpenXR
 		const TArray <FInputActionSpeechMapping>& SpeechMappings = GetDefault<UInputSettings>()->GetSpeechMappings();
 
 		XrRemotingSpeechInitInfoMSFT remotingSpeechInfo{ (XrStructureType)XR_TYPE_REMOTING_SPEECH_INIT_INFO_MSFT };
-
+		
 		// A language string is required for remoting speech to work.
 		// Default to "en-US", but allow for additional languages in the game config.
 		FString RemotingSpeechLanguage = "en-US";
