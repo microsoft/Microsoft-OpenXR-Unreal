@@ -24,12 +24,14 @@ namespace MicrosoftOpenXR
 {
 	void FSecondaryViewConfigurationPlugin::Register()
 	{
-		IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+		// Secondary view feature can trigger engine bug in 5.0 so this plugin is disabled until it is fixed.
+		// IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
 	}
 
 	void FSecondaryViewConfigurationPlugin::Unregister()
 	{
-		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
+		// Secondary view feature can trigger engine bug in 5.0 so this plugin is disabled until it is fixed.
+		// IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
 	}
 
 	bool FSecondaryViewConfigurationPlugin::GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions)
