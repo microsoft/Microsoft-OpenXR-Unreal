@@ -169,11 +169,48 @@ namespace MicrosoftOpenXR
 
 		static FORCEINLINE FGuid GUIDToFGuid(const winrt::guid& InGuid)
 		{
-			check(sizeof(FGuid) == sizeof(winrt::guid));
+			// Pack the FGuid correctly from the input winrt guid data, so the value is not lost in conversion.
+			// FGuids use 4 uint32's
+			// winrt guids use uint32, uint16, uint16, uint8[8]
+			// Do not simply memcpy guid to FGuid, or B, C, and D will be mismatched.
 
-			FGuid OutGuid;
-			FMemory::Memcpy(&OutGuid, &InGuid, sizeof(FGuid));
-			return OutGuid;
+			uint32 A = InGuid.Data1;
+			uint32 B = (uint32)InGuid.Data2 << 16 | InGuid.Data3;
+			uint32 C = (uint32)InGuid.Data4[0] << 24 |
+				(uint32)InGuid.Data4[1] << 16 |
+				(uint16)InGuid.Data4[2] << 8 |
+				InGuid.Data4[3];
+			uint32 D = (uint32)InGuid.Data4[4] << 24 |
+				(uint32)InGuid.Data4[5] << 16 |
+				(uint16)InGuid.Data4[6] << 8 |
+				InGuid.Data4[7];
+
+			return FGuid(A, B, C, D);
+		}
+
+		static FORCEINLINE winrt::guid FGUIDToGuid(const FGuid& InGuid)
+		{
+			// Pack the winrt guid correctly from the input FGuid data, so the value is not lost in conversion.
+			// FGuids use 4 uint32's
+			// winrt guids use uint32, uint16, uint16, uint8[8]
+			// Do not simply memcpy FGuid to guid, or Data2, Data3, and Data4 will be mismatched.
+
+			uint32_t Data1 = InGuid.A;
+			uint16_t Data2 = (uint16_t)((InGuid.B & 0xFFFF0000) >> 16);
+			uint16_t Data3 = (uint16_t)(InGuid.B & 0x0000FFFF);
+
+			std::array<uint8_t, 8Ui64> Data4;
+			Data4[0] = (uint8_t)((InGuid.C & 0xFF000000) >> 24);
+			Data4[1] = (uint8_t)((InGuid.C & 0x00FF0000) >> 16);
+			Data4[2] = (uint8_t)((InGuid.C & 0x0000FF00) >> 8);
+			Data4[3] = (uint8_t)(InGuid.C & 0x000000FF);
+
+			Data4[4] = (uint8_t)((InGuid.D & 0xFF000000) >> 24);
+			Data4[5] = (uint8_t)((InGuid.D & 0x00FF0000) >> 16);
+			Data4[6] = (uint8_t)((InGuid.D & 0x0000FF00) >> 8);
+			Data4[7] = (uint8_t)(InGuid.D & 0x000000FF);
+
+			return winrt::guid(Data1, Data2, Data3, Data4);
 		}
 	};
 }

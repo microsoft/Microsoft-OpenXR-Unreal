@@ -62,6 +62,7 @@ namespace MicrosoftOpenXR
 		RemotingConnectionData remotingConnectionData;
 
 		XrRemotingConnectionStateMSFT GetRemotingConnectionState();
+		void BindConnectButtons();
 		void ConnectToRemoteDevice(RemotingConnectionData data);
 		void DisconnectFromRemoteDevice();
 

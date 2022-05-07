@@ -12,6 +12,10 @@ namespace MicrosoftOpenXR
 	void FHolographicRemotingPlugin::Register()
 	{
 		IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+#if WITH_EDITOR
+		FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FHolographicRemotingPlugin::BindConnectButtons);
+#endif
 	}
 
 	void FHolographicRemotingPlugin::Unregister()
@@ -23,6 +27,22 @@ namespace MicrosoftOpenXR
 			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingConnect.Unbind();
 			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingDisconnect.Unbind();
 		}
+
+#if WITH_EDITOR
+		FCoreDelegates::OnFEngineLoopInitComplete.RemoveAll(this);
+#endif
+	}
+
+	void FHolographicRemotingPlugin::BindConnectButtons()
+	{
+#if WITH_EDITOR
+		if (UMicrosoftOpenXRRuntimeSettings::Get())
+		{
+			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingConnect.BindSP(this, &FHolographicRemotingPlugin::ConnectToRemoteDevice);
+			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingDisconnect.BindSP(
+				this, &FHolographicRemotingPlugin::DisconnectFromRemoteDevice);
+		}
+#endif
 	}
 
 	bool FHolographicRemotingPlugin::GetCustomLoader(PFN_xrGetInstanceProcAddr* OutGetProcAddr)
@@ -101,7 +121,6 @@ namespace MicrosoftOpenXR
 		ConnectToRemoteDevice(remotingConnectionData);
 	}
 
-	// Bind delegates here, since UMicrosoftOpenXRRuntimeSettings will now be initialized.
 	const void* FHolographicRemotingPlugin::OnCreateSession(XrInstance InInstance, XrSystemId InSystem, const void* InNext)
 	{
 #if WITH_EDITOR
@@ -112,13 +131,6 @@ namespace MicrosoftOpenXR
 		{
 			ParseRemotingConfig();
 			ConnectToRemoteDevice(remotingConnectionData);
-		}
-
-		if (UMicrosoftOpenXRRuntimeSettings::Get())
-		{
-			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingConnect.BindSP(this, &FHolographicRemotingPlugin::ConnectToRemoteDevice);
-			UMicrosoftOpenXRRuntimeSettings::Get()->OnRemotingDisconnect.BindSP(
-				this, &FHolographicRemotingPlugin::DisconnectFromRemoteDevice);
 		}
 #endif
 

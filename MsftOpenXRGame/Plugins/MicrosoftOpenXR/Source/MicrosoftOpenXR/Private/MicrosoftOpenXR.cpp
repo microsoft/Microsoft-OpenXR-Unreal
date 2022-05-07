@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 #include "MicrosoftOpenXR.h"
+
+#include "AzureObjectAnchorsPlugin.h"
 #include "CoreMinimal.h"
 #include "HandMeshPlugin.h"
 #include "HolographicRemotingPlugin.h"
@@ -16,6 +18,8 @@
 #include "SpatialAnchorPlugin.h"
 #include "SpatialMappingPlugin.h"
 #include "SpeechPlugin.h"
+
+DEFINE_LOG_CATEGORY(LogAOA)
 
 #define LOCTEXT_NAMESPACE "FMicrosoftOpenXRModule"
 
@@ -34,6 +38,8 @@ namespace MicrosoftOpenXR
 			SceneUnderstandingPlugin.Register();
 			SpatialMappingPlugin.Register();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+			AzureObjectAnchorsPlugin = MakeShared<FAzureObjectAnchorsPlugin>();
+			AzureObjectAnchorsPlugin->Register();
 			QRTrackingPlugin.Register();
 			LocatableCamPlugin.Register();
 			SpeechPlugin.Register();
@@ -61,6 +67,7 @@ namespace MicrosoftOpenXR
 			SceneUnderstandingPlugin.Unregister();
 			SpatialMappingPlugin.Unregister();
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+			AzureObjectAnchorsPlugin->Unregister();
 			QRTrackingPlugin.Unregister();
 			LocatableCamPlugin.Unregister();
 			SpeechPlugin.Unregister();
@@ -81,6 +88,7 @@ namespace MicrosoftOpenXR
 		FSceneUnderstandingPlugin SceneUnderstandingPlugin;
 		FSpatialMappingPlugin SpatialMappingPlugin;
 #if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+		TSharedPtr<FAzureObjectAnchorsPlugin> AzureObjectAnchorsPlugin;
 		FQRTrackingPlugin QRTrackingPlugin;
 		FLocatableCamPlugin LocatableCamPlugin;
 		FSpeechPlugin SpeechPlugin;
@@ -203,6 +211,52 @@ bool UMicrosoftOpenXRFunctionLibrary::IsRemoting()
 bool UMicrosoftOpenXRFunctionLibrary::CanDetectPlanes()
 {
 	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->SceneUnderstandingPlugin.CanDetectPlanes();
+}
+
+bool UMicrosoftOpenXRFunctionLibrary::ToggleAzureObjectAnchors(const bool bOnOff)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	return MicrosoftOpenXR::g_MicrosoftOpenXRModule->AzureObjectAnchorsPlugin->OnToggleARCapture(bOnOff);
+#endif
+
+	return true;
+}
+
+void UMicrosoftOpenXRFunctionLibrary::InitAzureObjectAnchors(FAzureObjectAnchorSessionConfiguration AOAConfiguration)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	MicrosoftOpenXR::g_MicrosoftOpenXRModule->AzureObjectAnchorsPlugin->InitAzureObjectAnchors(AOAConfiguration);
+#endif
+}
+
+void UMicrosoftOpenXRFunctionLibrary::ResetObjectSearchAreaAroundHead()
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	MicrosoftOpenXR::g_MicrosoftOpenXRModule->AzureObjectAnchorsPlugin->ResetObjectSearchAreaAroundHead();
+#endif
+}
+
+void UMicrosoftOpenXRFunctionLibrary::ResetObjectSearchAreaAroundPoint(FVector Point, float Radius, bool ClearExistingSearchAreas)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	MicrosoftOpenXR::g_MicrosoftOpenXRModule->AzureObjectAnchorsPlugin->ResetObjectSearchAreaAroundPoint(Point, Radius, ClearExistingSearchAreas);
+#endif
+}
+
+TArray<FARTraceResult> UMicrosoftOpenXRFunctionLibrary::LineTraceTrackedAzureObjectAnchors(const FVector Start, const FVector End)
+{
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+	TArray<FARTraceResult> Results = MicrosoftOpenXR::g_MicrosoftOpenXRModule->AzureObjectAnchorsPlugin->OnLineTraceTrackedObjects(nullptr, Start, End, EARLineTraceChannels::None);
+	
+	Results.Sort([](const FARTraceResult& A, const FARTraceResult& B)
+	{
+		return A.GetDistanceFromCamera() < B.GetDistanceFromCamera();
+	});
+
+	return Results;
+#endif
+
+	return {};
 }
 
 #undef LOCTEXT_NAMESPACE
