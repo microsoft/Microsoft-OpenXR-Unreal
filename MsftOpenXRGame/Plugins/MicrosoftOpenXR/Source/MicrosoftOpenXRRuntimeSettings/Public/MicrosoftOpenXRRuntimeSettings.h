@@ -32,7 +32,7 @@ namespace MicrosoftOpenXR
 	{
 		FString IP;
 		uint32 Port = 8265;
-		int Bitrate = 8000;
+		int Bitrate = 20000;
 		bool EnableAudio = false;
 		RemotingConnectionType ConnectionType = RemotingConnectionType::Connect;
 		RemotingCodec ConnectionCodec = RemotingCodec::Any;
@@ -67,15 +67,15 @@ public:
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (ConfigRestartRequired = true, DisplayName = "Enable Remoting For Editor (Requires Restart)", Tooltip = "If true, start with a valid HMD to enable connecting via remoting.  Editor restart required."))
 	bool bEnableRemotingForEditor = false;
 
-	/** The IP of the HoloLens to remote to. */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (EditCondition = "bEnableRemotingForEditor", DisplayName = "IP of HoloLens to remote to."))
+	/** The IP of the HoloLens or WMR HMD to remote to. */
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (EditCondition = "bEnableRemotingForEditor", DisplayName = "Remote Device IP."))
 	FString RemoteHoloLensIP;
 
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (EditCondition = "bEnableRemotingForEditor", DisplayName = "Automatically connect to remote device."))
 	bool bAutoConnectRemoting = false;
 
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (EditCondition = "bEnableRemotingForEditor", DisplayName = "Max network transfer rate (kb/s)."))
-	unsigned int MaxBitrate = 8000;
+	unsigned int MaxBitrate = 20000;
 
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "OpenXR Holographic Remoting", Meta = (EditCondition = "bEnableRemotingForEditor", DisplayName = "Use audio from PC when remoting."))
 	bool EnableAudio = false;

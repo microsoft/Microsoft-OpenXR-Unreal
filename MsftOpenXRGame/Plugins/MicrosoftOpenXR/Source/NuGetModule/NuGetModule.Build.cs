@@ -122,6 +122,38 @@ public class NuGetModule : ModuleRules
 				WinMDFiles.Add(WinMDFile);
 			}
 
+			string AOAPackage = InstalledPackages.FirstOrDefault(x => x.StartsWith("Microsoft.Azure.ObjectAnchors.Runtime.WinRT"));
+			if (!string.IsNullOrEmpty(AOAPackage))
+			{
+				string AOAFolderName = AOAPackage.Replace(" ", ".");
+
+				// Copy dll and winmd binaries to our local binaries folder
+				string WinMDFile = Path.Combine(NugetFolder, AOAFolderName, @"lib\uap10.0\Microsoft.Azure.ObjectAnchors.winmd");
+				SafeCopy(WinMDFile, Path.Combine(BinariesFolder, "Microsoft.Azure.ObjectAnchors.winmd"));
+
+				String[] Binaries = {
+					"Microsoft.Azure.ObjectAnchors.dll",
+					"ObjectTrackerApi.dll",
+					"ObjectTrackerDiagnostics.dll",
+					"ObjectTrackerFusion.dll",
+					"ObjectTrackerRefinement.dll",
+					"VolumeFusionAPI.dll" 
+				};
+
+				foreach (String Binary in Binaries)
+                {
+					SafeCopy(Path.Combine(NugetFolder, AOAFolderName, string.Format(@"runtimes\win10-{0}\native\{1}", Target.WindowsPlatform.Architecture.ToString(), Binary)),
+						Path.Combine(BinariesFolder, Binary));
+
+					RuntimeDependencies.Add(Path.Combine(BinariesFolder, Binary));
+				}
+
+				RuntimeDependencies.Add(Path.Combine(BinariesFolder, "Microsoft.Azure.ObjectAnchors.winmd"));
+
+				// Add winmd file to the list for further processing using cppwinrt.exe
+				WinMDFiles.Add(WinMDFile);
+			}
+
 			if (Target.Platform == UnrealTargetPlatform.Win64)
 			{
 				// Microsoft.VCRTForwarders.140 is needed to run WinRT dlls in Win64 platforms

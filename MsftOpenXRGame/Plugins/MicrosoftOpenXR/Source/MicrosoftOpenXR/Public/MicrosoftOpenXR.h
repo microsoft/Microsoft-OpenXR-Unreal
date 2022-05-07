@@ -8,6 +8,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Components/InputComponent.h"
 
+#include "AzureObjectAnchorTypes.h"
+
 #include "MicrosoftOpenXR.generated.h"
 
 // Currently remoting only supports x64 Windows: Editor and Packaged Exe
@@ -110,5 +112,33 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "MicrosoftOpenXR|OpenXR")
 	static bool CanDetectPlanes();
+
+	// Azure Object Anchors
+	/*Toggle Azure Object Anchor detection on or off.
+	@note After toggling on, InitAzureObjectAnchors must be called with a valid session configuration.
+	@param bOnOff Whether to turn on or off.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "MicrosoftOpenXR|Azure Object Anchors")
+	static bool ToggleAzureObjectAnchors(const bool bOnOff);
+
+	/*Initialize Azure Object Anchors with the input session config.  This will start the Azure Object detection.*/
+	UFUNCTION(BlueprintCallable, Category = "MicrosoftOpenXR|Azure Object Anchors")
+	static void InitAzureObjectAnchors(FAzureObjectAnchorSessionConfiguration AOAConfiguration);
+
+	/*Clear any existing search areas and look for objects around the current pose, using the search radius from the initial session config.*/
+	UFUNCTION(BlueprintCallable, Category = "MicrosoftOpenXR|Azure Object Anchors")
+	static void ResetObjectSearchAreaAroundHead();
+
+	/*Add a search area around a point in space and trigger new object detection.
+	@param Point Point in space to search around.
+	@param Radius Distance around point to search for objects.
+	@param ClearExistingSearchAreas If true, clear any existing search areas and only search around this point.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "MicrosoftOpenXR|Azure Object Anchors")
+	static void ResetObjectSearchAreaAroundPoint(FVector Point, float Radius = 100, bool ClearExistingSearchAreas = false);
+
+	/*Check for collisions against any tracked Azure Object Anchors along the input ray. */
+	UFUNCTION(BlueprintCallable, Category = "MicrosoftOpenXR|Azure Object Anchors")
+	static TArray<FARTraceResult> LineTraceTrackedAzureObjectAnchors(const FVector Start, const FVector End);
 };
 

@@ -53,6 +53,8 @@ namespace MicrosoftOpenXR
 		bool StartQRCodeWatcher();
 		void StopQRCodeWatcher();
 
+		void HandleEndPIE(const bool InIsSimulating);
+
 		// WinRT handlers
 		void OnAdded(winrt::Microsoft::MixedReality::QR::QRCodeWatcher sender, winrt::Microsoft::MixedReality::QR::QRCodeAddedEventArgs args);
 		void OnUpdated(winrt::Microsoft::MixedReality::QR::QRCodeWatcher sender, winrt::Microsoft::MixedReality::QR::QRCodeUpdatedEventArgs args);
@@ -74,6 +76,7 @@ namespace MicrosoftOpenXR
 			EARTrackingState TrackingState = EARTrackingState::Unknown;
 			FGuid SpatialGraphNodeId;
 			XrSpace Space = XR_NULL_HANDLE;
+			bool HasChanged = false;
 
 			~QRCodeContext();
 		};

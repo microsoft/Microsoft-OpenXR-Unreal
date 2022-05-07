@@ -11,6 +11,10 @@
 
 #include <winrt/Windows.Foundation.Collections.h>
 
+#if WITH_EDITOR
+#include "Editor.h"
+#endif
+
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Foundation::Collections;
 using namespace winrt::Windows::Perception::Spatial;
@@ -34,6 +38,17 @@ namespace MicrosoftOpenXR
 		}
 		FPlatformProcess::PopDllDirectory(*LibrariesDir);
 #endif
+	
+#if WITH_EDITOR
+		// When PIE stops (when remoting), ShutdownModule is not called.
+		// This will prevent QR from working on subsequent plays.
+		FEditorDelegates::EndPIE.AddRaw(this, &FQRTrackingPlugin::HandleEndPIE);
+#endif
+	}
+
+	void FQRTrackingPlugin::HandleEndPIE(const bool InIsSimulating)
+	{
+		Unregister();
 	}
 
 	void FQRTrackingPlugin::Unregister()
@@ -190,7 +205,17 @@ namespace MicrosoftOpenXR
 
 	void FQRTrackingPlugin::OnUpdated(QRCodeWatcher sender, QRCodeUpdatedEventArgs args)
 	{
-		//OnUpdated works not good, so it's replaced by loop in UpdateDeviceLocations
+		// Mark the tracked QRCode as updated so it will be located in UpdateDeviceLocations.
+		std::lock_guard<std::recursive_mutex> lock(QRCodeRefsLock);
+		if (QRTrackerInstance == nullptr) { return; }
+
+		FScopeLock Lock(&QRCodeContextsMutex);
+		FGuid Guid = WMRUtility::GUIDToFGuid(args.Code().Id());
+		if (QRCodeContexts.Contains(Guid))
+		{
+			QRCodeContextPtr& Context = QRCodeContexts[Guid];
+			Context->HasChanged = true;
+		}
 	}
 
 	void FQRTrackingPlugin::OnRemoved(QRCodeWatcher sender, QRCodeRemovedEventArgs args)
@@ -236,6 +261,13 @@ namespace MicrosoftOpenXR
 				}
 			}
 
+			if (!Context->HasChanged)
+			{
+				// Only update QR Codes that have updated.
+				continue;
+			}
+			Context->HasChanged = false;
+
 			auto OutCode = MakeShared<FOpenXRQRCodeData>();
 			OutCode->Id = OutGuid;
 			OutCode->Version = (int32_t)InCode.Version();
@@ -249,8 +281,9 @@ namespace MicrosoftOpenXR
 				SpatialGraphNodeSpaceCreateInfo.nodeType = XR_SPATIAL_GRAPH_NODE_TYPE_STATIC_MSFT;
 				SpatialGraphNodeSpaceCreateInfo.pose = ToXrPose(FTransform::Identity, XRTrackingSystem->GetWorldToMetersScale());
 
-				check(sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId) == sizeof(FGuid));
-				FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &Context->SpatialGraphNodeId, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
+				check(sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId) == sizeof(winrt::guid));
+				winrt::guid SourceGuid = WMRUtility::FGUIDToGuid(Context->SpatialGraphNodeId);
+				FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &SourceGuid, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
 
 				XR_ENSURE_MSFT(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Context->Space));
 			}
