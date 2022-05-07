@@ -98,5 +98,7 @@ namespace MicrosoftOpenXR
 		PFN_xrClearSpatialAnchorStoreMSFT xrClearSpatialAnchorStoreMSFT;
 
 		XrSpatialAnchorStoreConnectionMSFT SpatialAnchorStoreMSFT = XR_NULL_HANDLE;
+
+		void OnEndPlay();
 	};
 }	 // namespace MicrosoftOpenXR

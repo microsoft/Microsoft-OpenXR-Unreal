@@ -172,6 +172,8 @@ namespace MicrosoftOpenXR
 
 	void FSceneUnderstandingBase::Unregister()
 	{
+		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
+		
 		Stop();
 	}
 

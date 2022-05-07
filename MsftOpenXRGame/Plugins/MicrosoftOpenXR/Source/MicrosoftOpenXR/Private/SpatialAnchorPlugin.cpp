@@ -5,6 +5,8 @@
 #include "OpenXRCore.h"
 #include "ARPin.h"
 
+#include "GameDelegates.h"
+
 #if WINRT_ANCHOR_STORE_AVAILABLE 
 
 using namespace winrt::Windows::Perception::Spatial;
@@ -17,15 +19,12 @@ namespace MicrosoftOpenXR
 	void FSpatialAnchorPlugin::Register()
 	{
 		IModularFeatures::Get().RegisterModularFeature(GetModularFeatureName(), this);
+
+		FGameDelegates::Get().GetEndPlayMapDelegate().AddRaw(this, &FSpatialAnchorPlugin::OnEndPlay);
 	}
 
 	void FSpatialAnchorPlugin::Unregister()
 	{
-		if (bIsAnchorPersistenceExtensionSupported)
-		{
-			XR_ENSURE_MSFT(xrDestroySpatialAnchorStoreConnectionMSFT(SpatialAnchorStoreMSFT));
-		}
-
 #if WINRT_ANCHOR_STORE_AVAILABLE 
 		{
 			std::lock_guard<std::mutex> lock(m_spatialAnchorStoreLock);
@@ -38,6 +37,17 @@ namespace MicrosoftOpenXR
 #endif
 
 		IModularFeatures::Get().UnregisterModularFeature(GetModularFeatureName(), this);
+
+		FGameDelegates::Get().GetEndPlayMapDelegate().RemoveAll(this);
+	}
+
+	void FSpatialAnchorPlugin::OnEndPlay()
+	{
+		if (SpatialAnchorStoreMSFT != XR_NULL_HANDLE)
+		{
+			XR_ENSURE_MSFT(xrDestroySpatialAnchorStoreConnectionMSFT(SpatialAnchorStoreMSFT));
+			SpatialAnchorStoreMSFT = XR_NULL_HANDLE;
+		}
 	}
 
 	bool FSpatialAnchorPlugin::GetRequiredExtensions(TArray<const ANSICHAR*>& OutExtensions)
