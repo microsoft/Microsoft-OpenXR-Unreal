@@ -17,8 +17,6 @@ namespace MicrosoftOpenXR
 	public:
 		TrackedGeometryCollision(TArray<FVector> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices);
 
-		void UpdateVertices(const TArray<FVector>& InVertices, const TArray<MRMESH_INDEX_TYPE>& InIndices);
-
 		/// <summary>
 		/// Hit test a ray against tracked mesh data.
 		/// </summary>
@@ -30,6 +28,8 @@ namespace MicrosoftOpenXR
 		/// <param name="OutHitDistance">Distance from ray start</param>
 		/// <returns>True if the input ray collides with this mesh.</returns>
 		bool Collides(const FVector Start, const FVector End, const FTransform MeshToWorld, FVector& OutHitPoint, FVector& OutHitNormal, float& OutHitDistance);
+
+		static void CreateMeshDataForBoundingBox(FVector Center, FVector HalfExtents, TArray<FVector>& OutVertices, TArray<MRMESH_INDEX_TYPE>& OutIndices);
 
 	private:
 		TArray<FVector> Vertices;
