@@ -413,13 +413,24 @@ namespace MicrosoftOpenXR
 			InInstance, "xrGetSceneMeshBuffersMSFT", (PFN_xrVoidFunction*)&Ext.xrGetSceneMeshBuffersMSFT));
 
 		// Check if Scene Understanding supports plane finding.
-		uint32 FeatureCount;
-		TArray<XrSceneComputeFeatureMSFT> SceneComputeFeatures;
-		XR_ENSURE(Ext.xrEnumerateSceneComputeFeaturesMSFT(InInstance, InSystem, 0, &FeatureCount, nullptr));
-		SceneComputeFeatures.AddUninitialized(FeatureCount);
-		XR_ENSURE(Ext.xrEnumerateSceneComputeFeaturesMSFT(InInstance, InSystem, FeatureCount, &FeatureCount, SceneComputeFeatures.GetData()));
+		if (UMicrosoftOpenXRFunctionLibrary::IsRemoting())
+		{
+			// When remoting, xrEnumerateSceneComputeFeaturesMSFT will only contain XR_SCENE_COMPUTE_FEATURE_PLANE_MSFT
+			// If the app remoting player is running when the editor starts.
+			// Otherwise, this will always be false even though the 2.8+ remoting runtime does support planes.
+			// Workaround this by forcing this flag to true when remoting.
+			bCanDetectPlanes = true;
+		}
+		else
+		{
+			uint32 FeatureCount;
+			TArray<XrSceneComputeFeatureMSFT> SceneComputeFeatures;
+			XR_ENSURE(Ext.xrEnumerateSceneComputeFeaturesMSFT(InInstance, InSystem, 0, &FeatureCount, nullptr));
+			SceneComputeFeatures.AddUninitialized(FeatureCount);
+			XR_ENSURE(Ext.xrEnumerateSceneComputeFeaturesMSFT(InInstance, InSystem, FeatureCount, &FeatureCount, SceneComputeFeatures.GetData()));
 
-		bCanDetectPlanes = SceneComputeFeatures.Contains(XR_SCENE_COMPUTE_FEATURE_PLANE_MSFT);
+			bCanDetectPlanes = SceneComputeFeatures.Contains(XR_SCENE_COMPUTE_FEATURE_PLANE_MSFT);
+		}
 
 		return InNext;
 	}
