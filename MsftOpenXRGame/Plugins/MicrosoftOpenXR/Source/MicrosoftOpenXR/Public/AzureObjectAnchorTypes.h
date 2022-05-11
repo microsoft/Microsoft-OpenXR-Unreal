@@ -28,39 +28,39 @@ enum class EObjectRenderMode : uint8
 	BoundingBox
 };
 
-UCLASS(BlueprintType, Blueprintable, ClassGroup = AzureObjectAnchors)
+UCLASS(BlueprintType, Blueprintable, ClassGroup = AzureObjectAnchors, Category = "MicrosoftOpenXR|Azure Object Anchors")
 class MICROSOFTOPENXR_API UAzureObjectAnchorQueryModifiers : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	bool bUseExpectedMaxVerticalOrientationInDegrees = false;
 
 	/*Expected maximum angle in degrees between up direction of an object instance and gravity, from 0 to 180.
 	Small value indicates object is expected to be up-right, while large value allows more variation on the layout.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "180.0", EditCondition = "bUseExpectedMaxVerticalOrientationInDegrees"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "180.0", EditCondition = "bUseExpectedMaxVerticalOrientationInDegrees"), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	float ExpectedMaxVerticalOrientationInDegrees = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	bool bUseExpectedToBeStandingOnGroundPlane = false;
 
 	/*If true, only look for objects on the ground.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseExpectedToBeStandingOnGroundPlane"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseExpectedToBeStandingOnGroundPlane"), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	bool ExpectedToBeStandingOnGroundPlane = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	bool bUseMaxScaleChange = false;
 
 	/*Maximum scale change from 1*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseMaxScaleChange"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUseMaxScaleChange"), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	float MaxScaleChange = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (InlineEditConditionToggle), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	bool bUseMinSurfaceCoverage = false;
 
 	/*Minimum required surface coverage ratio to consider an object instance as true positive, from 0 to 1.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "1.0", EditCondition = "bUseMinSurfaceCoverage"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "1.0", EditCondition = "bUseMinSurfaceCoverage"), Category = "MicrosoftOpenXR|Azure Object Anchors")
 	float MinSurfaceCoverage = 0.0f;
 };
 
