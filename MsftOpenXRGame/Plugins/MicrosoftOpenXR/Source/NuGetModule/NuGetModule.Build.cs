@@ -174,12 +174,16 @@ public class NuGetModule : ModuleRules
 					SafeCopy(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\bin\x64\Desktop\Microsoft.Holographic.AppRemoting.OpenXr.dll"),
 						Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.dll"));
 
+					SafeCopy(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\bin\x64\Desktop\Microsoft.Holographic.AppRemoting.OpenXr.SU.dll"),
+						Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.SU.dll"));
+
 					SafeCopy(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\bin\x64\Desktop\RemotingXR.json"),
 						Path.Combine(BinariesFolder, "RemotingXR.json"));
 
 					PublicIncludePaths.Add(Path.Combine(NugetFolder, RemotingFolderName, @"build\native\include\openxr"));
 
 					RuntimeDependencies.Add(Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.dll"));
+					RuntimeDependencies.Add(Path.Combine(BinariesFolder, "Microsoft.Holographic.AppRemoting.OpenXr.SU.dll"));
 					RuntimeDependencies.Add(Path.Combine(BinariesFolder, "RemotingXR.json"));
 				}
 			}
