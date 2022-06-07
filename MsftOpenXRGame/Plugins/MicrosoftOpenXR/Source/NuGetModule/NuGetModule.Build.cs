@@ -12,6 +12,8 @@ public class NuGetModule : ModuleRules
 {
 	public NuGetModule(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PrecompileForTargets = PrecompileTargetsType.Any;
+		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
