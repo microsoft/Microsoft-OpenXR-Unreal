@@ -103,7 +103,8 @@ namespace MicrosoftOpenXR
 			SpatialGraphNodeSpaceCreateInfo.pose = ToXrPose(DynamicNode.GetValue().Value, XRTrackingSystem->GetWorldToMetersScale());
 
 			check(sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId) == sizeof(FGuid));
-			FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &DynamicNode.GetValue().Key, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
+			winrt::guid SourceGuid = WMRUtility::FGUIDToGuid(DynamicNode.GetValue().Key);
+			FMemory::Memcpy(&SpatialGraphNodeSpaceCreateInfo.nodeId, &SourceGuid, sizeof(SpatialGraphNodeSpaceCreateInfo.nodeId));
 
 			XR_ENSURE_MSFT(xrCreateSpatialGraphNodeSpaceMSFT(InSession, &SpatialGraphNodeSpaceCreateInfo, &Space));
 		}
