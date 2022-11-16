@@ -128,7 +128,7 @@ public:
 					break;
 				}
 
-				CopyTextureRef = DX11RHI->RHICreateTexture2DFromResource(PF_NV12, TexCreate_Dynamic | TexCreate_ShaderResource, FClearValueBinding::None, cameraImageTexture.Get());
+				CopyTextureRef = GetID3D11DynamicRHI()->RHICreateTexture2DFromResource(PF_NV12, TexCreate_Dynamic | TexCreate_ShaderResource, FClearValueBinding::None, cameraImageTexture.Get());
 			}
 			else if (bIsDx12)
 			{
@@ -141,7 +141,7 @@ public:
 					break;
 				}
 
-				CopyTextureRef = DX12RHI->RHICreateTexture2DFromResource(PF_NV12, TexCreate_Dynamic, FClearValueBinding::None, cameraImageTexture.Get());
+				CopyTextureRef = GetID3D12DynamicRHI()->RHICreateTexture2DFromResource(PF_NV12, TexCreate_Dynamic, FClearValueBinding::None, cameraImageTexture.Get());
 			}
 			else
 			{
@@ -158,10 +158,13 @@ public:
 
 			// Create the render target
 			{
-				FRHIResourceCreateInfo CreateInfo(TEXT("OpenXRDecodedTexture"));
-				TRefCountPtr<FRHITexture2D> DummyTexture2DRHI;
-				// Create our render target that we'll convert to
-				RHICreateTargetableShaderResource2D(Size.X, Size.Y, PF_B8G8R8A8, 1, TexCreate_Dynamic, TexCreate_RenderTargetable, false, CreateInfo, DecodedTextureRef, DummyTexture2DRHI);
+				const FRHITextureCreateDesc Desc =
+					FRHITextureCreateDesc::Create2D(TEXT("OpenXRDecodedTexture"))
+					.SetExtent(Size.X, Size.Y)
+					.SetFormat(PF_B8G8R8A8)
+					.SetFlags(TexCreate_Dynamic | TexCreate_RenderTargetable);
+
+				DecodedTextureRef = RHICreateTexture(Desc);
 			}
 
 			{
@@ -176,9 +179,15 @@ public:
 		// Default to an empty 1x1 texture if we don't have a camera image or failed to convert
 		if (!bDidConvert)
 		{
-			FRHIResourceCreateInfo CreateInfo(TEXT("OpenXRDecodedTextureFallback"));
 			Size.X = Size.Y = 1;
-			DecodedTextureRef = RHICreateTexture2D(Size.X, Size.Y, PF_B8G8R8A8, 1, 1, TexCreate_ShaderResource, CreateInfo);
+
+			const FRHITextureCreateDesc Desc =
+				FRHITextureCreateDesc::Create2D(TEXT("OpenXRDecodedTextureFallback"))
+				.SetExtent(Size.X, Size.Y)
+				.SetFormat(PF_B8G8R8A8)
+				.SetFlags(TexCreate_ShaderResource);
+
+			DecodedTextureRef = RHICreateTexture(Desc);
 		}
 
 		TextureRHI = DecodedTextureRef;

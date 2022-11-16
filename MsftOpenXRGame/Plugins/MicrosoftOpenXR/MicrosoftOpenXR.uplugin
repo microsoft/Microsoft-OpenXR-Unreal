@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.1.14",
+	"VersionName": "1.1.15",
 	"FriendlyName": "Microsoft OpenXR",
 	"Description": "The Microsoft OpenXR plugin is a game plugin which provides additional features available on Microsoft's Mixed Reality devices like the HoloLens 2 when using OpenXR.",
 	"Category": "Mixed Reality",
@@ -10,7 +10,7 @@
 	"DocsURL": "",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/ef8930ca860148c498b46887da196239",
 	"SupportURL": "https://github.com/microsoft/Microsoft-OpenXR-Unreal",
-	"EngineVersion": "5.0.0",
+	"EngineVersion": "5.1.0",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
