@@ -219,7 +219,7 @@ namespace MicrosoftOpenXR
 				auto& destVert = MeshUpdate->Vertices[j];
 				const auto& srcVert = HandState.Vertices[j];
 
-				destVert = ToFVector(srcVert.position, XRTrackingSystem->GetWorldToMetersScale());
+				destVert = ToFVector3f(srcVert.position, XRTrackingSystem->GetWorldToMetersScale());
 			}
 		}
 		TrackedMeshHolder->EndMeshUpdates();

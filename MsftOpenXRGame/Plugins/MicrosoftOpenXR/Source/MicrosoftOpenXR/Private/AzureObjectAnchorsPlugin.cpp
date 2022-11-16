@@ -725,7 +725,7 @@ namespace MicrosoftOpenXR
 									Model.GetVertexPositions(SrcVertices);
 									Model.GetTriangleIndices(SrcIndices);
 
-									TArray<FVector> Vertices;
+									TArray<FVector3f> Vertices;
 									TArray<MRMESH_INDEX_TYPE> Indices;
 
 									Vertices.AddUninitialized(Model.VertexCount());
@@ -739,7 +739,7 @@ namespace MicrosoftOpenXR
 
 									for (size_t i = 0; i < Model.VertexCount(); i++)
 									{
-										Vertices[i] = MicrosoftOpenXR::WMRUtility::FromFloat3(SrcVertices[i], Self->WorldToMetersScale);
+										Vertices[i] = MicrosoftOpenXR::WMRUtility::FromFloat3ToFVector3f(SrcVertices[i], Self->WorldToMetersScale);
 									}
 
 									Context.CollisionInfo = new TrackedGeometryCollision(Vertices, Indices);
@@ -759,8 +759,8 @@ namespace MicrosoftOpenXR
 										// Create an indexed primitive from the bounding box rather than using all of the model mesh data.
 										// This can help performance if the object model has too many polys.
 
-										FVector Center = WMRUtility::FromFloat3(Model.BoundingBox().Center, Self->WorldToMetersScale);
-										FVector HalfExtents = WMRUtility::FromFloat3(Model.BoundingBox().Extents / 2.0f, Self->WorldToMetersScale);
+										FVector3f Center = WMRUtility::FromFloat3ToFVector3f(Model.BoundingBox().Center, Self->WorldToMetersScale);
+										FVector3f HalfExtents = WMRUtility::FromFloat3ToFVector3f(Model.BoundingBox().Extents / 2.0f, Self->WorldToMetersScale);
 
 										TrackedGeometryCollision::CreateMeshDataForBoundingBox(Center, HalfExtents, Context.Vertices, Context.Indices);
 									}

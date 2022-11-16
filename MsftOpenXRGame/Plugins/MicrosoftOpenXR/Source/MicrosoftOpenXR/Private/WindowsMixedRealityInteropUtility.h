@@ -133,6 +133,14 @@ namespace MicrosoftOpenXR
 				pos.y) * scale;
 		}
 
+		static FORCEINLINE FVector3f FromFloat3ToFVector3f(winrt::Windows::Foundation::Numerics::float3 pos, float scale = 1.0f)
+		{
+			return FVector3f(
+				-1.0f * pos.z,
+				pos.x,
+				pos.y) * scale;
+		}
+
 		static FORCEINLINE FVector FromXMVectorTranslation(DirectX::XMVECTOR InValue, float scale = 1.0f)
 		{
 			InValue = DirectX::XMVectorMultiply(InValue, DirectX::XMVectorSet(scale, scale, -1 * scale, scale));

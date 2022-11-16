@@ -15,7 +15,7 @@ namespace MicrosoftOpenXR
 	class TrackedGeometryCollision
 	{
 	public:
-		TrackedGeometryCollision(TArray<FVector> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices);
+		TrackedGeometryCollision(TArray<FVector3f> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices);
 
 		/// <summary>
 		/// Hit test a ray against tracked mesh data.
@@ -29,9 +29,10 @@ namespace MicrosoftOpenXR
 		/// <returns>True if the input ray collides with this mesh.</returns>
 		bool Collides(const FVector Start, const FVector End, const FTransform MeshToWorld, FVector& OutHitPoint, FVector& OutHitNormal, float& OutHitDistance);
 
-		static void CreateMeshDataForBoundingBox(FVector Center, FVector HalfExtents, TArray<FVector>& OutVertices, TArray<MRMESH_INDEX_TYPE>& OutIndices);
+		static void CreateMeshDataForBoundingBox(FVector3f Center, FVector3f HalfExtents, TArray<FVector3f>& OutVertices, TArray<MRMESH_INDEX_TYPE>& OutIndices);
 
 	private:
+		// Note we store FVector here so that Collides doesn't have to do conversions, but the raw input geometry data is floats so those parameters are FVector3f.
 		TArray<FVector> Vertices;
 		TArray<MRMESH_INDEX_TYPE> Indices;
 

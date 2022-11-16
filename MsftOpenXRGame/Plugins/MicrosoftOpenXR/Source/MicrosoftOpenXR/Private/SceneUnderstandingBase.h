@@ -40,8 +40,8 @@ namespace MicrosoftOpenXR
 	{
 		FGuid MeshGuid;
 		EARObjectClassification Type;
-		FVector Extent;
-		TArray<FVector> Vertices;
+		FVector3f Extent;
+		TArray<FVector3f> Vertices;
 		TArray<MRMESH_INDEX_TYPE> Indices;
 	};
 

@@ -5,9 +5,17 @@
 
 namespace MicrosoftOpenXR
 {
-	TrackedGeometryCollision::TrackedGeometryCollision(TArray<FVector> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices)
-		: Vertices(std::move(InVertices)), Indices(std::move(InIndices))
+	TrackedGeometryCollision::TrackedGeometryCollision(TArray<FVector3f> InVertices, TArray<MRMESH_INDEX_TYPE> InIndices)
+		: Indices(std::move(InIndices))
 	{
+		{
+			const int Num = InVertices.Num();
+			Vertices.Reserve(Num);
+			for (int i = 0; i < Num; ++i)
+			{
+				Vertices.Add(FVector(InVertices[i]));
+			}
+		}
 		// Create a bounding box from the input vertices to reduce the number of full meshes that need to be hit-tested.
 		if (Vertices.Num() > 0)
 		{
@@ -52,7 +60,7 @@ namespace MicrosoftOpenXR
 		return false;
 	}
 
-	void TrackedGeometryCollision::CreateMeshDataForBoundingBox(FVector Center, FVector HalfExtents, TArray<FVector>& OutVertices, TArray<MRMESH_INDEX_TYPE>& OutIndices)
+	void TrackedGeometryCollision::CreateMeshDataForBoundingBox(FVector3f Center, FVector3f HalfExtents, TArray<FVector3f>& OutVertices, TArray<MRMESH_INDEX_TYPE>& OutIndices)
 	{
 		// Ensure output arrays are empty.  
 		OutVertices.Empty();
@@ -60,14 +68,14 @@ namespace MicrosoftOpenXR
 
 		// Top Vertices (+Z)
 		OutVertices.Add(Center + HalfExtents);
-		OutVertices.Add(Center + FVector(-HalfExtents.X, HalfExtents.Y, HalfExtents.Z));
-		OutVertices.Add(Center + FVector(HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
-		OutVertices.Add(Center + FVector(-HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(-HalfExtents.X, HalfExtents.Y, HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(-HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
 
 		// Bottom Vertices (-Z)
-		OutVertices.Add(Center + FVector(HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
-		OutVertices.Add(Center + FVector(-HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
-		OutVertices.Add(Center + FVector(HalfExtents.X, -HalfExtents.Y, -HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(-HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
+		OutVertices.Add(Center + FVector3f(HalfExtents.X, -HalfExtents.Y, -HalfExtents.Z));
 		OutVertices.Add(Center - HalfExtents);
 
 		// Clockwise winding

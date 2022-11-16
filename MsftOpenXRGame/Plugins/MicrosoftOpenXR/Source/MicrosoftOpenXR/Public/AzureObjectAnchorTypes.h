@@ -96,7 +96,7 @@ struct FAzureObjectAnchorSessionConfiguration
 
 	/*Optional query modifiers to use when locating objects.*/
 	UPROPERTY(BlueprintReadWrite, AdvancedDisplay, Category = "MicrosoftOpenXR|Azure Object Anchors")
-	UAzureObjectAnchorQueryModifiers* QueryModifiers = nullptr;
+	TObjectPtr<UAzureObjectAnchorQueryModifiers> QueryModifiers = nullptr;
 };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAOA, All, All);

@@ -4,7 +4,7 @@
 #include "HolographicWindowAttachmentPlugin.h"
 
 #if PLATFORM_HOLOLENS
-#include "HoloLens/HoloLensApplication.h"
+#include "HoloLensApplication.h"
 
 #include <Unknwn.h>
 
