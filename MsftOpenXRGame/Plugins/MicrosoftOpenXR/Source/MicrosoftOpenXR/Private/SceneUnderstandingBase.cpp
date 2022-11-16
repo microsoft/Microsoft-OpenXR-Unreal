@@ -194,6 +194,8 @@ namespace MicrosoftOpenXR
 		{
 			Stop();
 		}
+
+		return true;
 	}
 
 	void FSceneUnderstandingBase::UpdateObjectLocations(XrTime DisplayTime, XrSpace TrackingSpace)
