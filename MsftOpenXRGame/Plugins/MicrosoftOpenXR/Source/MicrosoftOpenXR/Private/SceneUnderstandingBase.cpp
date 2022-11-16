@@ -186,7 +186,14 @@ namespace MicrosoftOpenXR
 
 	bool FSceneUnderstandingBase::OnToggleARCapture(const bool bOnOff)
 	{
-		bShouldStartSceneUnderstanding = true;
+		if (bOnOff)
+		{
+			bShouldStartSceneUnderstanding = true;
+		}
+		else
+		{
+			Stop();
+		}
 
 		return true;
 	}
@@ -597,7 +604,6 @@ namespace MicrosoftOpenXR
 	void FSceneUnderstandingBase::Stop()
 	{
 		bShouldStartSceneUnderstanding = false;
-		bARSessionStarted = false;
 		ScanState = EScanState::Idle;
 		LocatingScene.Reset();
 		SceneObserver.Reset();
