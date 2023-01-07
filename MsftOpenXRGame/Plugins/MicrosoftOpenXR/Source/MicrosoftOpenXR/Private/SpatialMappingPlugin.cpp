@@ -16,7 +16,11 @@ namespace MicrosoftOpenXR
 
 	XrSceneComputeConsistencyMSFT FSpatialMappingPlugin::GetSceneComputeConsistency()
 	{
-		return XR_SCENE_COMPUTE_CONSISTENCY_OCCLUSION_OPTIMIZED_MSFT;
+		bool bShouldDoHighQualityMeshing = false;
+		GConfig->GetBool(TEXT("/Script/HoloLensSettings.SceneUnderstanding"), TEXT("ShouldDoSceneUnderstandingHighQualityMeshing"),
+			bShouldDoHighQualityMeshing, GGameIni);
+
+		return bShouldDoHighQualityMeshing ? XR_SCENE_COMPUTE_CONSISTENCY_SNAPSHOT_INCOMPLETE_FAST_MSFT : XR_SCENE_COMPUTE_CONSISTENCY_OCCLUSION_OPTIMIZED_MSFT;
 	}
 
 	TArray<XrSceneComputeFeatureMSFT> FSpatialMappingPlugin::GetSceneComputeFeatures(class UARSessionConfig* SessionConfig)

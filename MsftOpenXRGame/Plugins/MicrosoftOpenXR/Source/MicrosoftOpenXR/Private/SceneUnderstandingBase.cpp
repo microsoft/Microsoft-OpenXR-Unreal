@@ -304,6 +304,34 @@ namespace MicrosoftOpenXR
 				TrackedMeshHolder->RemovePlane(XrUuidMSFTToFGuid(PlaneUuid));
 			}
 		}
+
+		// Add TrackedMeshs before setting its mesh data
+		for (const auto& Elem : SceneUpdate.Planes)
+		{
+			const XrUuidMSFT& PlaneUuid = Elem.Key;
+			if (!PreviousPlanes.Contains(PlaneUuid))
+			{
+				// Don't add plane if extent is zero
+				if (FVector(Elem.Value.Extent).Length() > 0)
+				{
+					FOpenXRPlaneUpdate* PlaneUpdate = TrackedMeshHolder->AllocatePlaneUpdate(XrUuidMSFTToFGuid(PlaneUuid));
+					PlaneUpdate->Type = Elem.Value.Type;
+				}
+
+				// Only add mesh if guid valid
+				const FGuid& MeshGuid = Elem.Value.MeshGuid;
+				if (MeshGuid.IsValid())
+				{
+					FOpenXRMeshUpdate* MeshUpdate = TrackedMeshHolder->AllocateMeshUpdate(MeshGuid);
+					MeshUpdate->Type = Elem.Value.Type;
+
+					MeshUpdate->SpatialMeshUsageFlags =
+						(EARSpatialMeshUsageFlags)((int32)EARSpatialMeshUsageFlags::Visible |
+							(int32)EARSpatialMeshUsageFlags::Collision);
+				}
+			}
+		}
+
 		TrackedMeshHolder->EndMeshUpdates();
 
 		PreviousPlanes.Reset();
@@ -323,8 +351,8 @@ namespace MicrosoftOpenXR
 	void FSceneUnderstandingBase::OnStartARSession(class UARSessionConfig* SessionConfig)
 	{
 		float VolumeSize;
-		if (GConfig->GetFloat(TEXT("/Script/HoloLensPlatformEditor.HoloLensTargetSettings"), TEXT("SpatialMeshingVolumeSize"),
-			VolumeSize, GEngineIni))
+		if (GConfig->GetFloat(TEXT("/Script/HoloLensSettings.SceneUnderstanding"), TEXT("SceneUnderstandingVolumeRadius"),
+			VolumeSize, GGameIni))
 		{
 			SphereBoundRadius = VolumeSize / 2.0f;
 		}
@@ -334,6 +362,13 @@ namespace MicrosoftOpenXR
 			VolumeHeight, GGameIni))
 		{
 			BoundHeight = VolumeHeight / 2.0f;
+		}
+
+		int32 MeshingLOD;
+		if (GConfig->GetInt(TEXT("/Script/HoloLensSettings.SceneUnderstanding"), TEXT("SceneUnderstandingMeshingLOD"),
+			MeshingLOD, GGameIni))
+		{
+			SpatialMeshingLOD = (XrMeshComputeLodMSFT)FMath::Clamp(MeshingLOD, 1, 4);
 		}
 
 		PlaneAlignmentFilters.Reset();
@@ -504,7 +539,7 @@ namespace MicrosoftOpenXR
 			else if (SceneComputeState == XR_SCENE_COMPUTE_STATE_COMPLETED_MSFT)
 			{
 				XrSceneComponentTypeMSFT SceneComponentType = 
-					GetSceneComputeConsistency() == XR_SCENE_COMPUTE_CONSISTENCY_OCCLUSION_OPTIMIZED_MSFT ?
+					ComputeFeatures.Contains(XR_SCENE_COMPUTE_FEATURE_VISUAL_MESH_MSFT) ? 
 					XR_SCENE_COMPONENT_TYPE_VISUAL_MESH_MSFT : XR_SCENE_COMPONENT_TYPE_OBJECT_MSFT;
 
 				FSceneHandle Scene = CreateScene(Ext, SceneObserver.Handle());
@@ -544,7 +579,7 @@ namespace MicrosoftOpenXR
 			const float WorldToMetersScale = XRTrackingSystem->GetWorldToMetersScale();
 			TrackedMeshHolder->StartMeshUpdates();
 
-			for (int i = 0; i < UuidsToLocatePerFrame; i++)
+			for (int32 i = 0; i < UuidsToLocatePerFrame; i++)
 			{
 				const XrUuidMSFT& PlaneUuid = UuidsToLocate[UuidToLocateThisFrame];
 				const FGuid PlaneGuid = XrUuidMSFTToFGuid(PlaneUuid);
@@ -552,19 +587,24 @@ namespace MicrosoftOpenXR
 				const FGuid& MeshGuid = Plane.MeshGuid;
 				const auto& Location = Locations[UuidToLocateThisFrame];
 
-				FOpenXRPlaneUpdate* PlaneUpdate = TrackedMeshHolder->AllocatePlaneUpdate(PlaneGuid);
-				PlaneUpdate->Type = Plane.Type;
-				PlaneUpdate->Extent = FVector(Plane.Extent);
-				if (IsPoseValid(Location.flags))
+				// Don't add plane if extent is zero
+				if (FVector(Plane.Extent).Length() > 0)
 				{
-					PlaneUpdate->LocalToTrackingTransform = GetPlaneTransform(Location.pose, WorldToMetersScale);
-				}
-				else
-				{
-					// A location was not found, hide the mesh until it is located.
-					PlaneUpdate->LocalToTrackingTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector::ZeroVector);
+					FOpenXRPlaneUpdate* PlaneUpdate = TrackedMeshHolder->AllocatePlaneUpdate(PlaneGuid);
+					PlaneUpdate->Type = Plane.Type;
+					PlaneUpdate->Extent = FVector(Plane.Extent);
+					if (IsPoseValid(Location.flags))
+					{
+						PlaneUpdate->LocalToTrackingTransform = GetPlaneTransform(Location.pose, WorldToMetersScale);
+					}
+					else
+					{
+						// A location was not found, hide the mesh until it is located.
+						PlaneUpdate->LocalToTrackingTransform = FTransform(FQuat::Identity, FVector::ZeroVector, FVector::ZeroVector);
+					}
 				}
 
+				// Only add mesh if guid valid
 				if (MeshGuid.IsValid())
 				{
 					FOpenXRMeshUpdate* MeshUpdate = TrackedMeshHolder->AllocateMeshUpdate(MeshGuid);
@@ -631,6 +671,11 @@ namespace MicrosoftOpenXR
 			SceneComputeInfo.bounds.sphereCount = 1;
 			SceneComputeInfo.bounds.spheres = &SceneSphere;
 		}
+
+		// Set VisualMeshComputeLodInfo
+		XrVisualMeshComputeLodInfoMSFT VisualMeshComputeLodInfo{ XR_TYPE_VISUAL_MESH_COMPUTE_LOD_INFO_MSFT };
+		VisualMeshComputeLodInfo.lod = SpatialMeshingLOD;
+		SceneComputeInfo.next = &VisualMeshComputeLodInfo;
 
 		XR_ENSURE(Ext.xrComputeNewSceneMSFT(SceneObserver.Handle(), &SceneComputeInfo));
 	}
