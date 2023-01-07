@@ -121,6 +121,7 @@ namespace MicrosoftOpenXR
 		XrSceneSphereBoundMSFT SceneSphere;
 		float SphereBoundRadius = 10.0f;	// meters
 		float BoundHeight = 0.0f;			// meters
+		XrMeshComputeLodMSFT SpatialMeshingLOD = XR_MESH_COMPUTE_LOD_COARSE_MSFT;
 		bool bShouldStartSceneUnderstanding = false;
 		bool bARSessionStarted = false;
 		bool bCanDetectPlanes = false;
